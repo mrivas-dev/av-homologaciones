@@ -1,0 +1,159 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Home",
+    "homologate": "Homologate",
+    "status": "Status",
+    "admin": "Administration",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "home": {
+    "title": "AV Homologations",
+    "subtitle": "Professional vehicle homologation management in Argentina",
+    "description": "Modern platform to start and track homologation requests for trailers, rolling boxes, and motorhomes.",
+    "cta": "Start Homologation",
+    "features": {
+      "title": "Features",
+      "tracking": {
+        "title": "Real-time tracking",
+        "description": "Monitor your homologation status at every stage of the process"
+      },
+      "documents": {
+        "title": "Document management",
+        "description": "Upload and manage all necessary documentation securely"
+      },
+      "payments": {
+        "title": "Integrated payments",
+        "description": "Process payments securely through MercadoPago"
+      },
+      "support": {
+        "title": "Specialized support",
+        "description": "Professional assistance throughout the homologation process"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email address",
+      "password": "Password",
+      "remember": "Remember me",
+      "forgot": "Forgot your password?",
+      "google": "Continue with Google",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "register": {
+      "title": "Create Account",
+      "fullName": "Full name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "terms": "I accept the terms and conditions",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "homologation": {
+    "title": "Vehicle Homologation",
+    "steps": {
+      "vehicle": {
+        "title": "Vehicle Information",
+        "type": "Vehicle type",
+        "trailer": "Trailer",
+        "rollingBox": "Rolling Box",
+        "motorhome": "Motorhome",
+        "brand": "Brand",
+        "model": "Model",
+        "year": "Year",
+        "vin": "VIN (optional)",
+        "licensePlate": "License plate (optional)",
+        "axles": "Axles",
+        "length": "Length (cm)",
+        "width": "Width (cm)",
+        "height": "Height (cm)",
+        "maxWeight": "Max weight (kg)"
+      },
+      "documents": {
+        "title": "Documentation",
+        "upload": "Upload document",
+        "idCard": "ID Card",
+        "vehicleTitle": "Vehicle Title",
+        "insurance": "Insurance",
+        "safetyCertificate": "Safety Certificate",
+        "other": "Other"
+      },
+      "payment": {
+        "title": "Payment",
+        "amount": "Amount",
+        "currency": "ARS",
+        "process": "Process payment",
+        "pending": "Payment pending",
+        "paid": "Payment completed"
+      },
+      "review": {
+        "title": "Review and Submit",
+        "confirm": "Confirm and submit request",
+        "success": "Request submitted successfully"
+      }
+    }
+  },
+  "status": {
+    "title": "Homologation Status",
+    "search": "Search by request number",
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "underReview": "Under Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "completed": "Completed"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "refunded": "Refunded"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "dashboard": "Dashboard",
+    "homologations": "Homologations",
+    "users": "Users",
+    "payments": "Payments",
+    "reports": "Reports",
+    "actions": "Actions",
+    "approve": "Approve",
+    "reject": "Reject",
+    "notes": "Notes"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordMismatch": "Passwords do not match",
+    "minLength": "Minimum {min} characters",
+    "maxLength": "Maximum {max} characters",
+    "fileSize": "File is too large",
+    "fileType": "File type not allowed"
+  }
+}

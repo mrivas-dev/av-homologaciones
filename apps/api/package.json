@@ -1,0 +1,26 @@
+{
+  "name": "@av/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "supabase functions serve --env-file ../../.env",
+    "build": "supabase functions build",
+    "deploy": "supabase functions deploy",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@av/types": "workspace:*",
+    "@supabase/functions-js": "^2.3.4",
+    "@supabase/supabase-js": "^2.38.4",
+    "mercadopago": "^2.0.8",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/deno": "^2.1.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.54.0"
+  }
+}

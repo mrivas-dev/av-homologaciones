@@ -1,0 +1,22 @@
+{
+  "extends": "../../packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "./types/global.d.ts"],
+    "noImplicitAny": false,
+    "strict": false,
+    "module": "ESNext",
+    "target": "ES2022",
+    "isolatedModules": true,
+    "allowJs": true,
+    "noEmitOnError": false
+  },
+  "include": ["types/**/*"],
+  "exclude": ["node_modules", "dist", ".turbo"]
+}
