@@ -1,0 +1,122 @@
+# Project metadata and tech stack
+project:
+  name: AV Homologación
+  description: Fullstack web app for vehicle homologation.
+  stack:
+    frontend: React + NextJS + TypeScript
+    backend: Deno + Oak + Supabase/PostgreSQL
+    container: Docker
+  repository:
+    type: git
+    url: "[Your repository URL]"
+
+# Development environment configuration
+environment:
+  node_version: "18.x"
+  deno_version: "1.35.0"
+  database:
+    name: av_homologation
+    version: "14.0"
+
+# Code organization rules
+structure:
+  frontend:
+    root: ./frontend
+    src: ./frontend/src
+    components: ./frontend/src/components
+    pages: ./frontend/src/pages
+    styles: ./frontend/src/styles
+    tests: ./frontend/__tests__
+  
+  backend:
+    root: ./backend
+    src: ./backend/src
+    routes: ./backend/src/routes
+    services: ./backend/src/services
+    middlewares: ./backend/src/middlewares
+    tests: ./backend/__tests__
+
+# Coding standards
+code_style:
+  general:
+    - Use consistent indentation (2 spaces)
+    - Use single quotes for strings
+    - Maximum line length: 100 characters
+    - Trailing commas in multi-line objects/arrays
+  
+  typescript:
+    - Enable strict mode
+    - Use interface over type for object definitions
+    - Prefer explicit return types for public methods
+    - Use readonly for immutable properties
+
+# Git workflow
+version_control:
+  branch_strategy:
+    main: Production releases
+    develop: Integration branch
+    feature/: New features
+    fix/: Bug fixes
+    chore/: Maintenance tasks
+  
+  commit_message:
+    format: "<type>(<scope>): <description>"
+    types:
+      - feat: New feature
+      - fix: Bug fix
+      - docs: Documentation changes
+      - style: Code style changes
+      - refactor: Code refactoring
+      - test: Adding or modifying tests
+      - chore: Maintenance tasks
+    example: "feat(auth): implement JWT authentication"
+
+# Testing guidelines
+testing:
+  frontend:
+    framework: Jest + React Testing Library
+    coverage: 80% minimum
+    run: npm test
+  backend:
+    framework: Deno's built-in test runner
+    coverage: 80% minimum
+    run: deno test
+
+# Code review process
+code_review:
+  required_approvals: 1
+  checks:
+    - Linting passes
+    - Tests pass
+    - No console.log statements in production code
+    - Proper error handling
+    - Security considerations addressed
+
+# Deployment configuration
+deployment:
+  environments:
+    development:
+      url: http://localhost:3000
+      database: localhost:5432
+    staging:
+      url: https://staging.av-homologacion.com
+      database: staging-db.av-homologacion.com
+    production:
+      url: https://av-homologacion.com
+      database: prod-db.av-homologacion.com
+
+# Dependencies
+dependencies:
+  update_policy: 
+    - Use exact versions in package.json
+    - Run security audits weekly
+    - Document major version upgrades
+
+# Documentation
+documentation:
+  api: ./docs/api
+  frontend: ./docs/frontend
+  backend: ./docs/backend
+  architecture: ./docs/architecture
+  setup: ./docs/SETUP.md
+  changelog: ./CHANGELOG.md

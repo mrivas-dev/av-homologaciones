@@ -1,0 +1,16 @@
+{
+  "frontend": {
+    "path": "frontend",
+    "framework": "nextjs",
+    "language": "typescript"
+  },
+  "backend": {
+    "path": "backend",
+    "framework": "deno",
+    "database": "postgresql"
+  },
+  "docker": {
+    "path": "docker",
+    "compose": "docker-compose.yml"
+  }
+}

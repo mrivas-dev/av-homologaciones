@@ -1,0 +1,163 @@
+# Commit Message Convention for AV Homologaciones
+# Based on Conventional Commits (https://www.conventionalcommits.org/)
+
+# Core Commit Types
+# Each type represents a category of changes
+types:
+  - type: "feat"
+    description: "A new feature or significant enhancement"
+    emoji: "✨"
+  - type: "fix"
+    description: "A bug fix"
+    emoji: "🐛"
+  - type: "chore"
+    description: "Maintenance tasks, dependency updates, config changes"
+    emoji: "🔧"
+  - type: "docs"
+    description: "Documentation only changes"
+    emoji: "📝"
+  - type: "refactor"
+    description: "Code change that neither fixes a bug nor adds a feature"
+    emoji: "♻️"
+  - type: "style"
+    description: "Formatting, missing semi-colons, etc. (no code change)"
+    emoji: "💄"
+  - type: "test"
+    description: "Adding or modifying tests"
+    emoji: "✅"
+  - type: "perf"
+    description: "Performance improvements"
+    emoji: "⚡"
+  - type: "ci"
+    description: "CI/CD related changes"
+    emoji: "👷"
+
+# Common Scopes by Area
+# Customize these based on your project structure
+scopes:
+  # Frontend
+  - name: "frontend"
+    description: "General frontend changes"
+  - name: "ui"
+    description: "UI component changes"
+  - name: "page-*"
+    description: "Page-specific changes (e.g., page-dashboard, page-login)"
+  - name: "hook-*"
+    description: "React hook changes"
+  
+  # Backend
+  - name: "backend"
+    description: "General backend changes"
+  - name: "api"
+    description: "API endpoint changes"
+  - name: "auth"
+    description: "Authentication/authorization"
+  - name: "db"
+    description: "Database schema/migrations"
+  
+  # Shared/Infra
+  - name: "deps"
+    description: "Dependency updates"
+  - name: "config"
+    description: "Configuration changes"
+  - name: "docker"
+    description: "Docker-related changes"
+  - name: "docs"
+    description: "Documentation updates"
+
+# Commit Message Format
+format: "<type>(<scope>): <subject>\n\n[optional body]\n\n[optional footer]"
+
+# Rules
+rules:
+  # Subject rules
+  subject-max-length: 72
+  subject-min-length: 10
+  subject-case: ["sentence-case", "lower-case"]
+  subject-empty: false
+  subject-full-stop: ["never", "."]
+  
+  # Type rules
+  type-case: "lower-case"
+  type-empty: false
+  type-enum:
+    - feat
+    - fix
+    - chore
+    - docs
+    - refactor
+    - style
+    - test
+    - perf
+    - ci
+  
+  # Scope rules
+  scope-case: ["kebab-case", "lower-case"]
+  scope-empty: false
+  
+  # Body rules
+  body-leading-blank: true
+  body-max-line-length: 100
+  
+  # Footer rules
+  footer-leading-blank: true
+  footer-max-line-length: 100
+
+# Examples
+examples:
+  - "feat(api): add new homologation endpoint"
+  - "fix(auth): handle expired refresh tokens"
+  - "chore(deps): update nextjs to v14.2.5"
+  - "docs(backend): update API documentation"
+  - "refactor(ui): extract button component"
+  - "test(backend): add unit tests for auth service"
+  - "style(frontend): fix linting errors in dashboard"
+  - "perf(api): optimize database queries for operations"
+  - "ci: add github actions workflow for tests"
+
+# Bad Examples (to avoid)
+bad-examples:
+  - "update stuff"
+  - "fix"
+  - "wip: login page"
+  - "fixes #123"
+  - "small changes"
+  - "trying something new"
+
+# Footer Examples
+footer-examples:
+  - "BREAKING CHANGE: authentication now requires MFA"
+  - "Closes #123"
+  - "Refs: #456, #789"
+
+# When to use body
+body-guidelines: |
+  Use the body to explain WHAT and WHY vs. HOW.
+  - Focus on the "why" behind the change
+  - Include any relevant context or background
+  - Mention any trade-offs or alternatives considered
+  - For larger changes, include before/after examples
+
+# Additional Notes
+notes:
+  - Keep commits small and focused on a single logical change
+  - Use the imperative mood ("Add" not "Added" or "Adds")
+  - Consider using a commit template in your IDE
+  - Reference issues and pull requests in the footer when applicable
+  - Use emojis in commit messages if your team prefers them
+
+# Version Bumping
+version-bumping:
+  major:
+    - "BREAKING CHANGE:"
+  minor:
+    - "feat"
+  patch:
+    - "fix"
+    - "perf"
+    - "refactor"
+    - "chore"
+    - "docs"
+    - "style"
+    - "test"
+    - "ci"
