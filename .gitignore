@@ -140,3 +140,36 @@ Thumbs.db
 !.vscode/settings.json
 !.vscode/launch.json
 !.vscode/tasks.json
+
+# ===============
+# Docker
+# ===============
+# Docker Compose
+**/docker-compose.override.yml
+
+# Docker volume data
+db/postgres_data/
+
+# Docker logs
+*.log
+
+# Docker environment files
+.env.docker
+
+# ===============
+# PostgreSQL
+# ===============
+# PostgreSQL log files
+*.log
+pgdata/
+postgres-data/
+
+# PostgreSQL temporary files
+*.pid
+*.sock
+*.sock.lock
+*.sock.finish
+
+# PostgreSQL data directory
+/pgdata/
+/postgres-data/
