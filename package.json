@@ -1,10 +1,15 @@
 {
   "scripts": {
+    "setup": "bash setup.sh",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "cd backend && deno task dev",
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "start": "npm run dev"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

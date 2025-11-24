@@ -1,41 +1,11 @@
-// Importing standard Deno modules
-import { Application, Router } from "https://deno.land/x/oak@v17.1.6/mod.ts";
-import { Client } from "https://deno.land/x/postgres@v0.19.5/mod.ts";
-import { load } from "jsr:@std/dotenv@^0.225.0";
-
-console.log("Loading environment variables...");
-const env = await load();
-console.log("Environment variables loaded");
-
-const db = new Client({
-  hostname: env.DB_HOST || "localhost",
-  port: Number(env.DB_PORT) || 5432,
-  user: env.DB_USER || "postgres",
-  password: env.DB_PASSWORD || "",
-  database: env.DB_NAME || "postgres",
-});
-
-let dbConnected = false;
-try {
-  // Set a timeout for database connection
-  const connectPromise = db.connect();
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("Connection timeout")), 5000)
-  );
-
-  await Promise.race([connectPromise, timeoutPromise]);
-  dbConnected = true;
-  console.log("✅ Database connected successfully");
-} catch (error) {
-  console.error("⚠️  Database connection failed:", (error as Error).message);
-  console.log("Server will start without database connection");
-}
+// Import dependencies from deps.ts
+import { Application, Router } from "./deps.ts";
 
 const app = new Application();
 const router = new Router();
 
 // CORS middleware
-app.use(async (ctx, next) => {
+app.use(async (ctx: any, next: () => Promise<void>) => {
   ctx.response.headers.set("Access-Control-Allow-Origin", "*");
   ctx.response.headers.set(
     "Access-Control-Allow-Methods",
@@ -54,24 +24,25 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-router.get("/api/hello", (ctx) => {
+// Simple API endpoint
+router.get("/api/hello", (ctx: any) => {
   ctx.response.body = { message: "Hello from Deno backend!" };
 });
 
-router.get("/api/messages", async (ctx) => {
-  if (!dbConnected) {
-    ctx.response.status = 503;
-    ctx.response.body = { error: "Database not connected" };
-    return;
-  }
+// Mock messages endpoint that doesn't require a database
+router.get("/api/messages", (ctx: any) => {
+  ctx.response.body = [
+    { id: 1, text: "This is a test message" },
+    { id: 2, text: "No database required" }
+  ];
+});
 
+// Error handling middleware
+app.use(async (ctx: any, next: () => Promise<void>) => {
   try {
-    const result = await db.queryObject<{ id: number; text: string }>(
-      "SELECT * FROM messages",
-    );
-    ctx.response.body = result.rows;
-  } catch (error) {
-    console.error("Database error:", error);
+    await next();
+  } catch (err) {
+    console.error("Error:", err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Internal server error" };
   }

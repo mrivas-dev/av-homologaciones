@@ -1,3 +1,5 @@
+# First, create a temporary file with the corrected schema
+cat > /tmp/fixed_schema.sql << 'EOL'
 -- ============================================
 -- ENUMS
 -- ============================================
@@ -209,3 +211,6 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 EOL
+
+# Then execute the fixed schema
+docker exec -i av_db psql -U avuser -d av < /tmp/fixed_schema.sql
