@@ -3,6 +3,11 @@
 ## Overview
 The Vehicle Homologation System is designed to manage the certification process for trailers, rolling boxes, and motorhomes, ensuring they meet specific regulatory standards and requirements.
 
+## Access Control
+- **Public Access**: Anyone can create and edit homologation requests without authentication
+- **Admin Access**: Administrative functions (approvals, system management) require authentication
+- **Data Ownership**: Homologations are managed through unique access links rather than user accounts
+
 ## Homologation Process
 
 ### 1. Application Creation
