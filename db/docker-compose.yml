@@ -1,25 +1,46 @@
 version: '3.8'
 
 services:
-  mysql:
+  db:
     image: mysql:8.0
-    container_name: av_mysql
+    container_name: av-mysql
     environment:
-      MYSQL_DATABASE: av_db
-      MYSQL_USER: av_user
-      MYSQL_PASSWORD: av_pass
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-av_db}
+      MYSQL_USER: ${DB_USER:-root}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_ROOT_HOST: '%'
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uav_user", "-pav_pass"]
-      interval: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USER:-root}", "-p${DB_PASSWORD:-root}"]
       timeout: 5s
-      retries: 5
+      retries: 10
     restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - av-network
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
+    networks:
+      - av-network
 
 volumes:
   mysql_data:
+
+driver: local
+
+networks:
+  av-network:
+    driver: bridge
