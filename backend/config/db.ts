@@ -1,27 +1,53 @@
 import { Client } from "../deps.ts";
 
-// Load environment variables
-const env = await Deno.env.toObject();
-
+// Database configuration
 const dbConfig = {
-  hostname: env.DB_HOST || "localhost",
-  port: parseInt(env.DB_PORT || "3306"),
-  username: env.DB_USER || "root",
-  password: env.DB_PASSWORD || "",
-  db: env.DB_NAME || "av_db",
+  hostname: "localhost",
+  port: 3306,
+  username: "root",  // Using root for now, but should be a dedicated user in production
+  password: "root",
+  db: "av_db",
+  poolSize: 3,
 };
 
-// Create a database connection
-const client = await new Client().connect({
-  ...dbConfig,
-  poolSize: 3, // connection pool size
-});
+// Create a single client instance
+let client: Client | null = null;
 
-export { client };
+async function getClient(): Promise<Client> {
+  if (!client) {
+    client = new Client();
+    try {
+      console.log(`🔌 Attempting to connect to MySQL at ${dbConfig.hostname}:${dbConfig.port}...`);
+      await client.connect({
+        hostname: dbConfig.hostname,
+        port: dbConfig.port,
+        username: dbConfig.username,
+        password: dbConfig.password,
+        db: dbConfig.db,
+        poolSize: dbConfig.poolSize,
+      });
+      console.log("✅ Successfully connected to MySQL database");
+    } catch (error) {
+      console.error("❌ Failed to connect to MySQL database:", error.message);
+      console.log("Connection details:", {
+        hostname: dbConfig.hostname,
+        port: dbConfig.port,
+        username: dbConfig.username,
+        database: dbConfig.db
+      });
+      client = null;
+      throw error;
+    }
+  }
+  return client;
+}
 
 // Initialize the database
 async function initializeDatabase() {
   try {
+    const client = await getClient();
+    
+    // Create database if it doesn't exist
     await client.execute(`CREATE DATABASE IF NOT EXISTS ${dbConfig.db}`);
     await client.execute(`USE ${dbConfig.db}`);
     
@@ -37,10 +63,34 @@ async function initializeDatabase() {
     `);
     
     console.log("✅ Database initialized successfully");
+    return true;
   } catch (error) {
     console.error("❌ Error initializing database:", error);
     throw error;
   }
 }
 
-export { initializeDatabase };
+// Close the database connection
+async function closeConnection() {
+  if (client) {
+    try {
+      await client.close();
+      console.log("✅ Database connection closed");
+    } catch (error) {
+      console.error("❌ Error closing database connection:", error);
+    } finally {
+      client = null;
+    }
+  }
+}
+
+// Handle process termination
+if (typeof Deno !== 'undefined') {
+  Deno.addSignalListener("SIGINT", async () => {
+    console.log("\nClosing database connection...");
+    await closeConnection();
+    Deno.exit(0);
+  });
+}
+
+export { initializeDatabase, closeConnection, getClient };

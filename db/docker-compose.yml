@@ -3,24 +3,24 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: av-mysql
+    container_name: av_mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_DATABASE: ${DB_NAME:-av_db}
-      MYSQL_USER: ${DB_USER:-root}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: av_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
       MYSQL_ROOT_HOST: '%'
+    command: --default-authentication-plugin=mysql_native_password
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USER:-root}", "-p${DB_PASSWORD:-root}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       timeout: 5s
       retries: 10
     restart: unless-stopped
-    command: --default-authentication-plugin=mysql_native_password
     networks:
       - av-network
 
@@ -38,8 +38,6 @@ services:
 
 volumes:
   mysql_data:
-
-driver: local
 
 networks:
   av-network:
