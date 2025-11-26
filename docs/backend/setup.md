@@ -2,7 +2,7 @@
 
 ## Prerequisites
 - Deno 1.30.0 or higher
-- PostgreSQL 13+
+- MySQL 8.0 or higher (or Docker)
 - (Optional) Docker
 
 ## Installation
@@ -18,27 +18,17 @@
    ```env
    # Database Configuration
    DB_HOST=localhost
-   DB_PORT=5432
-   DB_USER=postgres
-   DB_PASSWORD=yourpassword
-   DB_NAME=postgres
+   DB_PORT=3306
+   DB_USER=av_user
+   DB_PASSWORD=av_pass
+   DB_NAME=av_db
    ```
 
 ## Database Setup
 
-1. Create a new PostgreSQL database
-   ```bash
-   createdb your_database_name
-   ```
+1. Make sure the MySQL server is running (or use the provided Docker Compose setup)
 
-2. Create the messages table
-   ```sql
-   CREATE TABLE IF NOT EXISTS messages (
-     id SERIAL PRIMARY KEY,
-     text TEXT NOT NULL,
-     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-   );
-   ```
+2. The database and tables will be automatically created when you start the application with the MySQL connection details in your `.env` file.
 
 ## Running the Application
 
@@ -72,20 +62,28 @@ deno test --allow-net --allow-env --allow-read
 | Variable     | Description                     | Default     |
 |--------------|---------------------------------|-------------|
 | DB_HOST      | Database host                   | localhost   |
-| DB_PORT      | Database port                   | 5432        |
-| DB_USER      | Database user                   | postgres    |
-| DB_PASSWORD  | Database password               | (required)  |
-| DB_NAME      | Database name                   | postgres    |
+| DB_PORT      | Database port                   | 3306        |
+| DB_USER      | Database user                   | av_user     |
+| DB_PASSWORD  | Database password               | av_pass     |
+| DB_NAME      | Database name                   | av_db       |
 
 ## Troubleshooting
 
 ### Database Connection Issues
-1. Verify PostgreSQL is running
+1. Verify MySQL is running
    ```bash
-   pg_isready
+   # If using the Docker setup
+   docker ps | grep mysql
+   
+   # Or if running MySQL locally
+   mysqladmin ping -h localhost -u av_user -p
    ```
 2. Check connection details in `.env`
 3. Ensure the database and user exist
+4. Check MySQL logs for any errors:
+   ```bash
+   docker logs av_mysql
+   ```
 
 ### Port Already in Use
 If port 4000 is in use, either:
