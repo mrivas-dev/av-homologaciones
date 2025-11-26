@@ -1,24 +1,25 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16.1-alpine
-    container_name: av_postgres
+  mysql:
+    image: mysql:8.0
+    container_name: av_mysql
     environment:
-      POSTGRES_DB: av_db
-      POSTGRES_USER: av_user
-      POSTGRES_PASSWORD: av_pass
+      MYSQL_DATABASE: av_db
+      MYSQL_USER: av_user
+      MYSQL_PASSWORD: av_pass
+      MYSQL_ROOT_PASSWORD: rootpass
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U av_user -d av_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uav_user", "-pav_pass"]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  mysql_data:

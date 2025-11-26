@@ -1,6 +1,6 @@
-# PostgreSQL Database Setup
+# MySQL Database Setup
 
-This directory contains the Docker configuration for the PostgreSQL database used in the AV project.
+This directory contains the Docker configuration for the MySQL database used in the AV project.
 
 ## Prerequisites
 
@@ -25,41 +25,45 @@ This directory contains the Docker configuration for the PostgreSQL database use
 
 ## Connecting from Deno
 
-Here's a sample connection snippet using `deno-postgres` from JSR:
+Here's a sample connection snippet using `mysql2` from JSR:
 
 ```typescript
-import { Client } from "jsr:@libsql/client@0.1.0";
+import mysql from "npm:mysql2@^3.6.0/promise";
 
-const client = new Client({
+const connection = await mysql.createConnection({
+  host: "localhost",
   user: "av_user",
   password: "av_pass",
   database: "av_db",
-  hostname: "localhost",
-  port: 5432,
+  port: 3306
 });
 
-// Example query
-const result = await client.queryObject`
-  SELECT * FROM message_queue WHERE status = 'pending';
-`;
-
-console.log(result.rows);
-
-// Don't forget to close the connection when done
-await client.end();
+try {
+  // Example query
+  const [rows] = await connection.execute(
+    "SELECT * FROM message_queue WHERE status = ?",
+    ['pending']
+  );
+  
+  console.log(rows);
+} finally {
+  // Close the connection when done
+  await connection.end();
+}
 ```
 
 ## Database Information
 
 - **Host**: localhost
-- **Port**: 5432
+- **Port**: 3306
 - **Database**: av_db
 - **Username**: av_user
 - **Password**: av_pass
+- **Root Password**: rootpass (for admin access)
 
 ## Volumes
 
-Database data is persisted in a Docker volume named `av_postgres_data`. To completely remove the database (including all data), run:
+Database data is persisted in a Docker volume named `av_mysql_data`. To completely remove the database (including all data), run:
 
 ```bash
 docker-compose down -v
