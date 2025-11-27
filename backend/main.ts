@@ -1,8 +1,21 @@
 // Import dependencies from deps.ts
 import { Application, Router } from "./deps.ts";
+import { initializeDatabase } from "./config/db.ts";
 
+// Initialize application and router
 const app = new Application();
 const router = new Router();
+
+// Initialize database connection
+let isDatabaseConnected = false;
+try {
+  await initializeDatabase();
+  isDatabaseConnected = true;
+  console.log("✅ Database connection established successfully");
+} catch (error) {
+  console.error("❌ Failed to connect to database:", error);
+  console.log("⚠️  Starting server without database connection");
+}
 
 // CORS middleware
 app.use(async (ctx: any, next: () => Promise<void>) => {
@@ -22,6 +35,15 @@ app.use(async (ctx: any, next: () => Promise<void>) => {
   }
 
   await next();
+});
+
+// Health check endpoint
+router.get("/api/health", (ctx: any) => {
+  ctx.response.body = {
+    status: "ok",
+    database: isDatabaseConnected ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  };
 });
 
 // Simple API endpoint
