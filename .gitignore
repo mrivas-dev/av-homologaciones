@@ -173,3 +173,11 @@ postgres-data/
 # PostgreSQL data directory
 /pgdata/
 /postgres-data/
+
+# Backend uploads
+backend/uploads/
+backend/*.jpg
+backend/*.png
+backend/*.jpeg
+backend/*.gif
+backend/server.log
