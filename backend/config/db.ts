@@ -2,11 +2,11 @@ import { Client } from "../deps.ts";
 
 // Database configuration
 const dbConfig = {
-  hostname: "localhost",
-  port: 3306,
-  username: "root",  // Using root for now, but should be a dedicated user in production
-  password: "root",
-  db: "av_db",
+  hostname: Deno.env.get("DB_HOST") || "localhost",
+  port: parseInt(Deno.env.get("DB_PORT") || "3306"),
+  username: Deno.env.get("DB_USER") || "root",
+  password: Deno.env.get("DB_PASSWORD") || "root",
+  db: Deno.env.get("DB_NAME") || "homologation_db",
   poolSize: 3,
 };
 
@@ -17,7 +17,9 @@ async function getClient(): Promise<Client> {
   if (!client) {
     client = new Client();
     try {
-      console.log(`🔌 Attempting to connect to MySQL at ${dbConfig.hostname}:${dbConfig.port}...`);
+      console.log(
+        `🔌 Attempting to connect to MySQL at ${dbConfig.hostname}:${dbConfig.port}...`,
+      );
       await client.connect({
         hostname: dbConfig.hostname,
         port: dbConfig.port,
@@ -28,12 +30,15 @@ async function getClient(): Promise<Client> {
       });
       console.log("✅ Successfully connected to MySQL database");
     } catch (error) {
-      console.error("❌ Failed to connect to MySQL database:", error.message);
+      console.error(
+        "❌ Failed to connect to MySQL database:",
+        (error as Error).message,
+      );
       console.log("Connection details:", {
         hostname: dbConfig.hostname,
         port: dbConfig.port,
         username: dbConfig.username,
-        database: dbConfig.db
+        database: dbConfig.db,
       });
       client = null;
       throw error;
@@ -46,11 +51,11 @@ async function getClient(): Promise<Client> {
 async function initializeDatabase() {
   try {
     const client = await getClient();
-    
+
     // Create database if it doesn't exist
     await client.execute(`CREATE DATABASE IF NOT EXISTS ${dbConfig.db}`);
     await client.execute(`USE ${dbConfig.db}`);
-    
+
     // Create message_queue table if it doesn't exist
     await client.execute(`
       CREATE TABLE IF NOT EXISTS message_queue (
@@ -61,7 +66,7 @@ async function initializeDatabase() {
         INDEX idx_status (status)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    
+
     console.log("✅ Database initialized successfully");
     return true;
   } catch (error) {
@@ -85,7 +90,7 @@ async function closeConnection() {
 }
 
 // Handle process termination
-if (typeof Deno !== 'undefined') {
+if (typeof Deno !== "undefined") {
   Deno.addSignalListener("SIGINT", async () => {
     console.log("\nClosing database connection...");
     await closeConnection();
@@ -93,4 +98,4 @@ if (typeof Deno !== 'undefined') {
   });
 }
 
-export { initializeDatabase, closeConnection, getClient };
+export { closeConnection, getClient, initializeDatabase };

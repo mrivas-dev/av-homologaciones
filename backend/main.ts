@@ -2,9 +2,14 @@
 import { Application, Router } from "./deps.ts";
 import { initializeDatabase } from "./config/db.ts";
 
-// Initialize application and router
+// Import routes
+import authRoutes from "./routes/auth.routes.ts";
+import homologationRoutes from "./routes/homologation.routes.ts";
+import photoRoutes from "./routes/photo.routes.ts";
+import adminRoutes from "./routes/admin.routes.ts";
+
+// Initialize application
 const app = new Application();
-const router = new Router();
 
 // Initialize database connection
 let isDatabaseConnected = false;
@@ -17,12 +22,20 @@ try {
   console.log("⚠️  Starting server without database connection");
 }
 
+// Request logging middleware
+app.use(async (ctx: any, next: () => Promise<void>) => {
+  const start = Date.now();
+  await next();
+  const ms = Date.now() - start;
+  console.log(`${ctx.request.method} ${ctx.request.url.pathname} - ${ms}ms`);
+});
+
 // CORS middleware
 app.use(async (ctx: any, next: () => Promise<void>) => {
   ctx.response.headers.set("Access-Control-Allow-Origin", "*");
   ctx.response.headers.set(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS",
   );
   ctx.response.headers.set(
     "Access-Control-Allow-Headers",
@@ -37,41 +50,53 @@ app.use(async (ctx: any, next: () => Promise<void>) => {
   await next();
 });
 
-// Health check endpoint
-router.get("/api/health", (ctx: any) => {
-  ctx.response.body = {
-    status: "ok",
-    database: isDatabaseConnected ? "connected" : "disconnected",
-    timestamp: new Date().toISOString()
-  };
-});
-
-// Simple API endpoint
-router.get("/api/hello", (ctx: any) => {
-  ctx.response.body = { message: "Hello from Deno backend!" };
-});
-
-// Mock messages endpoint that doesn't require a database
-router.get("/api/messages", (ctx: any) => {
-  ctx.response.body = [
-    { id: 1, text: "This is a test message" },
-    { id: 2, text: "No database required" }
-  ];
-});
-
 // Error handling middleware
 app.use(async (ctx: any, next: () => Promise<void>) => {
   try {
     await next();
   } catch (err) {
     console.error("Error:", err);
-    ctx.response.status = 500;
-    ctx.response.body = { error: "Internal server error" };
+    ctx.response.status = err.status || 500;
+    ctx.response.body = {
+      error: err.message || "Internal server error",
+    };
   }
 });
 
-app.use(router.routes());
-app.use(router.allowedMethods());
+// Health check endpoint
+const healthRouter = new Router();
+healthRouter.get("/api/health", (ctx: any) => {
+  ctx.response.body = {
+    status: "ok",
+    database: isDatabaseConnected ? "connected" : "disconnected",
+    timestamp: new Date().toISOString(),
+  };
+});
 
-console.log("✅ Deno backend running on http://localhost:4000");
-await app.listen({ port: 4000 });
+// Register all routes
+app.use(healthRouter.routes());
+app.use(healthRouter.allowedMethods());
+
+app.use(authRoutes.routes());
+app.use(authRoutes.allowedMethods());
+
+app.use(homologationRoutes.routes());
+app.use(homologationRoutes.allowedMethods());
+
+app.use(photoRoutes.routes());
+app.use(photoRoutes.allowedMethods());
+
+app.use(adminRoutes.routes());
+app.use(adminRoutes.allowedMethods());
+
+const PORT = parseInt(Deno.env.get("PORT") || "4000");
+
+console.log("✅ Deno backend running on http://localhost:" + PORT);
+console.log("📚 API Documentation:");
+console.log("  - Health: GET /api/health");
+console.log("  - Auth: POST /api/auth/login, /api/auth/register");
+console.log("  - Homologations: /api/homologations");
+console.log("  - Photos: /api/photos");
+console.log("  - Admin: /api/admin/homologations");
+
+await app.listen({ port: PORT });

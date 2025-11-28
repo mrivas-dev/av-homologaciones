@@ -99,26 +99,5 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- =============================================
 -- Add any additional indexes that might be needed after adding foreign keys
+-- Note: Indexes already created in previous migration
 -- =============================================
-CREATE INDEX IF NOT EXISTS idx_homologation_created_by ON homologations(created_by);
-CREATE INDEX IF NOT EXISTS idx_homologation_updated_by ON homologations(updated_by);
-CREATE INDEX IF NOT EXISTS idx_photos_created_by ON photos(created_by);
-CREATE INDEX IF NOT EXISTS idx_audit_logs_created_by ON audit_logs(created_by);
-
--- =============================================
--- Verify all constraints were added successfully
--- =============================================
-SELECT 
-    TABLE_NAME,
-    COLUMN_NAME,
-    CONSTRAINT_NAME,
-    REFERENCED_TABLE_NAME,
-    REFERENCED_COLUMN_NAME
-FROM 
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-WHERE 
-    REFERENCED_TABLE_SCHEMA = DATABASE()
-    AND REFERENCED_TABLE_NAME IS NOT NULL
-ORDER BY 
-    TABLE_NAME, 
-    CONSTRAINT_NAME;

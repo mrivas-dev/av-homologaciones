@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Base schemas
 const BaseSchema = z.object({
@@ -12,25 +12,35 @@ const BaseSchema = z.object({
   deletedBy: z.string().uuid().nullable().default(null),
 });
 
+// Base schema for Photo (no updatedAt/updatedBy in photos table)
+const PhotoBaseSchema = z.object({
+  id: z.string().uuid(),
+  createdAt: z.date().default(() => new Date()),
+  createdBy: z.string().uuid(),
+  isDeleted: z.boolean().default(false),
+  deletedAt: z.date().nullable().default(null),
+  deletedBy: z.string().uuid().nullable().default(null),
+});
+
 // Enums
 export const TrailerType = {
-  TRAILER: 'Trailer',
-  ROLLING_BOX: 'Rolling Box',
-  MOTORHOME: 'Motorhome',
+  TRAILER: "Trailer",
+  ROLLING_BOX: "Rolling Box",
+  MOTORHOME: "Motorhome",
 } as const;
 
 export const HomologationStatus = {
-  DRAFT: 'Draft',
-  PENDING_REVIEW: 'Pending Review',
-  PAYED: 'Payed',
-  INCOMPLETE: 'Incomplete',
-  APPROVED: 'Approved',
-  REJECTED: 'Rejected',
-  COMPLETED: 'Completed',
+  DRAFT: "Draft",
+  PENDING_REVIEW: "Pending Review",
+  PAYED: "Payed",
+  INCOMPLETE: "Incomplete",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  COMPLETED: "Completed",
 } as const;
 
 // Photo Schema
-export const PhotoSchema = BaseSchema.extend({
+export const PhotoSchema = PhotoBaseSchema.extend({
   homologationId: z.string().uuid(),
   fileName: z.string().min(1),
   filePath: z.string().min(1),
@@ -70,21 +80,26 @@ export const AuditLogSchema = BaseSchema.extend({
 export type AuditLog = z.infer<typeof AuditLogSchema>;
 
 // API Request/Response Types
-export type CreateHomologationRequest = Omit<
-  Homologation,
-  | 'id'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'createdBy'
-  | 'updatedBy'
-  | 'isDeleted'
-  | 'deletedAt'
-  | 'deletedBy'
-  | 'version'
-  | 'photos'
-> & {
-  photos?: Omit<Photo, 'id' | 'createdAt' | 'createdBy' | 'isDeleted' | 'deletedAt' | 'deletedBy'>[];
-};
+export type CreateHomologationRequest =
+  & Omit<
+    Homologation,
+    | "id"
+    | "createdAt"
+    | "updatedAt"
+    | "createdBy"
+    | "updatedBy"
+    | "isDeleted"
+    | "deletedAt"
+    | "deletedBy"
+    | "version"
+    | "photos"
+  >
+  & {
+    photos?: Omit<
+      Photo,
+      "id" | "createdAt" | "createdBy" | "isDeleted" | "deletedAt" | "deletedBy"
+    >[];
+  };
 
 export type UpdateHomologationStatusRequest = {
   status: typeof HomologationStatus[keyof typeof HomologationStatus];

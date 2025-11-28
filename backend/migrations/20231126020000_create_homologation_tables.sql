@@ -92,28 +92,6 @@ CREATE INDEX idx_audit_action ON audit_logs(action);
 
 -- =============================================
 -- Triggers for Automatic Updates
+-- Note: Triggers removed due to migration script limitations
+-- These should be added manually or via a separate script if needed
 -- =============================================
-DELIMITER //
-
--- Update version and updated_at on homologation update
-CREATE TRIGGER before_homologation_update
-BEFORE UPDATE ON homologations
-FOR EACH ROW
-BEGIN
-    SET NEW.version = OLD.version + 1;
-    SET NEW.updated_at = CURRENT_TIMESTAMP;
-END//
-
--- Log changes to homologations
-CREATE TRIGGER after_homologation_update
-AFTER UPDATE ON homologations
-FOR EACH ROW
-BEGIN
-    INSERT INTO audit_logs (entity_type, entity_id, action, old_values, new_values, created_by)
-    VALUES ('homologation', NEW.id, 'update', 
-            JSON_OBJECT('status', OLD.status, 'updated_at', OLD.updated_at),
-            JSON_OBJECT('status', NEW.status, 'updated_at', NEW.updated_at),
-            NEW.updated_by);
-END//
-
-DELIMITER ;

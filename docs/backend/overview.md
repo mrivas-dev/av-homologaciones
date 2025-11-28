@@ -3,21 +3,23 @@
 ## Current Implementation
 
 ### Technology Stack
+
 - **Runtime**: Deno
 - **Web Framework**: Oak
-- **Database**: PostgreSQL
+- **Database**: MySQL
 - **Environment Management**: dotenv
 
 ### System Architecture
 
 #### Core Components
+
 1. **Web Server**
    - Built with Oak framework
    - Handles HTTP requests and responses
    - Implements CORS middleware
 
 2. **Database Layer**
-   - PostgreSQL client integration
+   - MySQL client integration
    - Connection management with timeout
    - Basic error handling
 
@@ -26,6 +28,7 @@
    - Basic message retrieval
 
 #### Current Limitations
+
 - No authentication/authorization
 - Limited error handling
 - Basic database operations only
@@ -35,6 +38,7 @@
 ## Development Status
 
 ### Implemented Features
+
 - Basic server setup
 - Database connection with timeout
 - CORS middleware
@@ -42,6 +46,7 @@
 - Environment variable configuration
 
 ### Known Issues
+
 - No connection pooling
 - No proper error recovery
 - No request validation
