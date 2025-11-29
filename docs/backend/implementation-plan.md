@@ -47,33 +47,34 @@
 
 ### Authentication & Authorization
 
-- [ ] JWT authentication setup (Admin only)
-- [ ] Role-based access control (Admin)
+- [x] JWT authentication setup (Admin only)
+- [x] Role-based access control (Admin)
   - Public access for creating/editing homologations
   - Admin role for system management and approvals
-- [ ] Session management for admin interface
+- [x] Session management for admin interface
 
 ### Homologation Endpoints
 
-- [ ] `POST /api/homologations` - Create new homologation
-- [ ] `GET /api/homologations` - List homologations (with filtering)
-- [ ] `GET /api/homologations/:id` - Get homologation details
-- [ ] `PATCH /api/homologations/:id` - Update homologation
-- [ ] `DELETE /api/homologations/:id` - Soft delete homologation
-- [ ] `PATCH /api/homologations/:id/status` - Update status
+- [x] `POST /api/homologations` - Create new homologation
+- [x] `GET /api/homologations` - List homologations (with filtering)
+- [x] `GET /api/homologations/:id` - Get homologation details
+- [x] `PATCH /api/homologations/:id` - Update homologation
+- [x] `DELETE /api/homologations/:id` - Soft delete homologation
+- [x] `PATCH /api/homologations/:id/status` - Update status
 
 ### Photo Management
 
-- [ ] `POST /api/photos` - Upload photo
-- [ ] `GET /api/photos/:homologationId` - List photos for homologation
-- [ ] `GET /api/photos/:id` - Get photo details
-- [ ] `DELETE /api/photos/:id` - Remove photo
+- [x] `POST /api/photos` - Upload photo
+- [x] `GET /api/photos/homologation/:homologationId` - List photos for
+      homologation
+- [x] `GET /api/photos/:id` - Get photo details
+- [x] `DELETE /api/photos/:id` - Remove photo
 
 ### Admin Endpoints
 
-- [ ] `GET /api/admin/homologations` - List all homologations (admin view)
-- [ ] `POST /api/admin/homologations/:id/approve` - Approve homologation
-- [ ] `POST /api/admin/homologations/:id/reject` - Reject homologation
+- [x] `GET /api/admin/homologations` - List all homologations (admin view)
+- [x] `POST /api/admin/homologations/:id/approve` - Approve homologation
+- [x] `POST /api/admin/homologations/:id/reject` - Reject homologation
 
 ## Phase 5: Business Logic
 
@@ -134,7 +135,7 @@
 9. [x] Start Docker MySQL container
 10. [x] Run database migrations
 11. [x] Test all API endpoints
-12. [ ] Test admin approval workflows
+12. [/] Test admin approval workflows
 13. [ ] Begin Phase 5: Business Logic implementation
 
 ## Pending Tasks
@@ -154,4 +155,4 @@
 
 ---
 
-_Last Updated: 2025-11-28 6:22 PM_
+_Last Updated: 2025-11-28 9:10 PM_
