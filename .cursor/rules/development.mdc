@@ -1,0 +1,140 @@
+---
+description: Development guidelines and coding standards for AV Homologación project
+globs:
+alwaysApply: true
+---
+
+# AV Homologación - Development Guidelines
+
+## Project Overview
+
+**Name:** AV Homologación  
+**Description:** Fullstack web app for vehicle homologation
+
+### Tech Stack
+
+| Layer     | Technology                      |
+|-----------|---------------------------------|
+| Frontend  | React + Next.js + TypeScript    |
+| Backend   | Deno + Oak + Supabase/PostgreSQL |
+| Container | Docker                          |
+
+### Environment Versions
+
+- Node.js: 18.x
+- Deno: 1.35.0
+- PostgreSQL: 14.0
+- Database name: `av_homologation`
+
+## Project Structure
+
+### Frontend
+
+```
+./frontend/
+├── src/
+│   ├── components/   # Reusable UI components
+│   ├── pages/        # Next.js pages
+│   ├── styles/       # CSS/SCSS files
+│   └── ...
+└── __tests__/        # Test files
+```
+
+### Backend
+
+```
+./backend/
+├── src/
+│   ├── routes/       # API route handlers
+│   ├── services/     # Business logic
+│   ├── middlewares/  # Express/Oak middlewares
+│   └── ...
+└── __tests__/        # Test files
+```
+
+## Coding Standards
+
+### General
+
+- Use consistent indentation (2 spaces)
+- Use single quotes for strings
+- Maximum line length: 100 characters
+- Trailing commas in multi-line objects/arrays
+
+### TypeScript
+
+- Enable strict mode
+- Use `interface` over `type` for object definitions
+- Prefer explicit return types for public methods
+- Use `readonly` for immutable properties
+
+## Git Workflow
+
+### Branch Strategy
+
+| Branch Pattern | Purpose            |
+|----------------|--------------------|
+| `main`         | Production releases |
+| `develop`      | Integration branch  |
+| `feature/*`    | New features        |
+| `fix/*`        | Bug fixes           |
+| `chore/*`      | Maintenance tasks   |
+
+### Commit Messages
+
+Follow the format: `<type>(<scope>): <description>`
+
+Example: `feat(auth): implement JWT authentication`
+
+See [commit-rules.mdc](./commit-rules.mdc) for detailed commit conventions.
+
+## Testing
+
+### Frontend
+
+- **Framework:** Jest + React Testing Library
+- **Coverage:** 80% minimum
+- **Run:** `npm test`
+
+### Backend
+
+- **Framework:** Deno's built-in test runner
+- **Coverage:** 80% minimum
+- **Run:** `deno test`
+
+## Code Review Checklist
+
+Required approvals: 1
+
+Before merging, ensure:
+
+- [ ] Linting passes
+- [ ] Tests pass
+- [ ] No `console.log` statements in production code
+- [ ] Proper error handling implemented
+- [ ] Security considerations addressed
+
+## Deployment Environments
+
+| Environment | URL                                | Database                           |
+|-------------|------------------------------------|------------------------------------|
+| Development | http://localhost:3000              | localhost:5432                     |
+| Staging     | https://staging.av-homologacion.com | staging-db.av-homologacion.com    |
+| Production  | https://av-homologacion.com        | prod-db.av-homologacion.com        |
+
+## Dependency Management
+
+- Use exact versions in `package.json`
+- Run security audits weekly
+- Document major version upgrades
+
+## Documentation
+
+| Type         | Location              |
+|--------------|-----------------------|
+| API          | `./docs/api`          |
+| Frontend     | `./docs/frontend`     |
+| Backend      | `./docs/backend`      |
+| Architecture | `./docs/architecture` |
+| Setup        | `./docs/SETUP.md`     |
+| Changelog    | `./CHANGELOG.md`      |

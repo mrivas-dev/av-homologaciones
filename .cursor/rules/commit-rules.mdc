@@ -1,0 +1,124 @@
+---
+description: Commit message conventions for AV Homologaciones project based on Conventional Commits
+globs:
+alwaysApply: true
+---
+
+# Commit Message Convention
+
+Based on [Conventional Commits](https://www.conventionalcommits.org/)
+
+## Commit Message Format
+
+```
+<type>(<scope>): <subject>
+
+[optional body]
+
+[optional footer]
+```
+
+## Commit Types
+
+| Type       | Emoji | Description                                           |
+|------------|-------|-------------------------------------------------------|
+| `feat`     | ✨    | A new feature or significant enhancement              |
+| `fix`      | 🐛    | A bug fix                                             |
+| `chore`    | 🔧    | Maintenance tasks, dependency updates, config changes |
+| `docs`     | 📝    | Documentation only changes                            |
+| `refactor` | ♻️    | Code change that neither fixes a bug nor adds a feature |
+| `style`    | 💄    | Formatting, missing semi-colons, etc. (no code change) |
+| `test`     | ✅    | Adding or modifying tests                             |
+| `perf`     | ⚡    | Performance improvements                              |
+| `ci`       | 👷    | CI/CD related changes                                 |
+
+## Common Scopes
+
+### Frontend
+- `frontend` - General frontend changes
+- `ui` - UI component changes
+- `page-*` - Page-specific changes (e.g., `page-dashboard`, `page-login`)
+- `hook-*` - React hook changes
+
+### Backend
+- `backend` - General backend changes
+- `api` - API endpoint changes
+- `auth` - Authentication/authorization
+- `db` - Database schema/migrations
+
+### Shared/Infra
+- `deps` - Dependency updates
+- `config` - Configuration changes
+- `docker` - Docker-related changes
+- `docs` - Documentation updates
+
+## Rules
+
+### Subject
+- Max length: 72 characters
+- Min length: 10 characters
+- Case: sentence-case or lower-case
+- No period at the end
+- Use imperative mood ("Add" not "Added" or "Adds")
+
+### Type
+- Always lowercase
+- Must be one of the defined types
+
+### Scope
+- Use kebab-case or lowercase
+- Always include a scope
+
+### Body
+- Leading blank line required
+- Max line length: 100 characters
+- Explain WHAT and WHY vs. HOW
+
+### Footer
+- Leading blank line required
+- Max line length: 100 characters
+
+## Good Examples
+
+```
+feat(api): add new homologation endpoint
+fix(auth): handle expired refresh tokens
+chore(deps): update nextjs to v14.2.5
+docs(backend): update API documentation
+refactor(ui): extract button component
+test(backend): add unit tests for auth service
+style(frontend): fix linting errors in dashboard
+perf(api): optimize database queries for operations
+ci: add github actions workflow for tests
+```
+
+## Bad Examples (Avoid These)
+
+- `update stuff` - Too vague
+- `fix` - No description
+- `wip: login page` - WIP is not a valid type
+- `fixes #123` - Not following the format
+- `small changes` - Not descriptive
+- `trying something new` - Not professional
+
+## Footer Examples
+
+```
+BREAKING CHANGE: authentication now requires MFA
+Closes #123
+Refs: #456, #789
+```
+
+## Version Bumping
+
+- **Major**: Contains `BREAKING CHANGE:`
+- **Minor**: Type is `feat`
+- **Patch**: Types `fix`, `perf`, `refactor`, `chore`, `docs`, `style`, `test`, `ci`
+
+## Best Practices
+
+1. Keep commits small and focused on a single logical change
+2. Use the imperative mood ("Add" not "Added" or "Adds")
+3. Reference issues and pull requests in the footer when applicable
+4. For larger changes, include before/after examples in the body
+5. Focus on the "why" behind the change in the body
