@@ -31,18 +31,26 @@ router.patch(
     (ctx) => homologationController.update(ctx),
 );
 
+// Submit for review (public route, service handles validation)
+router.post(
+    "/api/homologations/:id/submit",
+    optionalAuth,
+    (ctx) => homologationController.submit(ctx),
+);
+
+// Status update (with optional auth - service validates admin for restricted transitions)
+router.patch(
+    "/api/homologations/:id/status",
+    optionalAuth,
+    (ctx) => homologationController.updateStatus(ctx),
+);
+
 // Admin-only routes
 router.delete(
     "/api/homologations/:id",
     requireAuth,
     requireAdmin,
     (ctx) => homologationController.delete(ctx),
-);
-router.patch(
-    "/api/homologations/:id/status",
-    requireAuth,
-    requireAdmin,
-    (ctx) => homologationController.updateStatus(ctx),
 );
 
 export default router;

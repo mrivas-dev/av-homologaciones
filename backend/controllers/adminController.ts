@@ -1,12 +1,12 @@
 import type { Context } from "../deps.ts";
 import { HomologationRepository } from "../repositories/homologationRepository.ts";
-import { AuditLogRepository } from "../repositories/auditLogRepository.ts";
+import { HomologationService } from "../services/homologationService.ts";
 import { HomologationStatus } from "../types/homologation.types.ts";
 import type { AuthContext } from "../types/auth.types.ts";
 import { z } from "../deps.ts";
 
 const homologationRepository = new HomologationRepository();
-const auditLogRepository = new AuditLogRepository();
+const homologationService = new HomologationService();
 
 const ApproveRejectSchema = z.object({
     reason: z.string().optional(),
@@ -64,41 +64,27 @@ export class AdminController {
                 return;
             }
 
-            // Get current homologation
-            const currentHomologation = await homologationRepository.findById(
+            const auth = ctx.state.auth as AuthContext;
+
+            // Use HomologationService for approval with validation
+            const result = await homologationService.approve(
                 id,
+                auth.user.id,
+                validationResult.data.reason,
             );
 
-            if (!currentHomologation) {
-                ctx.response.status = 404;
-                ctx.response.body = { error: "Homologation not found" };
+            if (!result.success) {
+                const statusCode = result.code === "NOT_FOUND" ? 404 : 400;
+                ctx.response.status = statusCode;
+                ctx.response.body = {
+                    error: result.error,
+                    code: result.code,
+                };
                 return;
             }
 
-            const auth = ctx.state.auth as AuthContext;
-
-            // Update status to approved
-            const homologation = await homologationRepository.updateStatus(
-                id,
-                HomologationStatus.APPROVED,
-                auth.user.id,
-            );
-
-            // Create audit log
-            await auditLogRepository.create({
-                entityType: "Homologation",
-                entityId: id,
-                action: "APPROVED",
-                oldValues: { status: currentHomologation.status },
-                newValues: {
-                    status: HomologationStatus.APPROVED,
-                    reason: validationResult.data.reason,
-                },
-                createdBy: auth.user.id,
-            });
-
             ctx.response.status = 200;
-            ctx.response.body = homologation;
+            ctx.response.body = result.homologation;
         } catch (error) {
             console.error("Approve homologation error:", error);
             ctx.response.status = 500;
@@ -132,43 +118,135 @@ export class AdminController {
                 return;
             }
 
-            // Get current homologation
-            const currentHomologation = await homologationRepository.findById(
+            const auth = ctx.state.auth as AuthContext;
+
+            // Use HomologationService for rejection with validation
+            const result = await homologationService.reject(
                 id,
+                auth.user.id,
+                validationResult.data.reason,
             );
 
-            if (!currentHomologation) {
-                ctx.response.status = 404;
-                ctx.response.body = { error: "Homologation not found" };
+            if (!result.success) {
+                const statusCode = result.code === "NOT_FOUND" ? 404 : 400;
+                ctx.response.status = statusCode;
+                ctx.response.body = {
+                    error: result.error,
+                    code: result.code,
+                };
+                return;
+            }
+
+            ctx.response.status = 200;
+            ctx.response.body = result.homologation;
+        } catch (error) {
+            console.error("Reject homologation error:", error);
+            ctx.response.status = 500;
+            ctx.response.body = { error: "Internal server error" };
+        }
+    }
+
+    /**
+     * POST /api/admin/homologations/:id/incomplete
+     * Mark a homologation as incomplete (admin only)
+     */
+    async markIncomplete(ctx: Context) {
+        try {
+            const id = ctx.params.id;
+
+            if (!id) {
+                ctx.response.status = 400;
+                ctx.response.body = { error: "Homologation ID is required" };
+                return;
+            }
+
+            const body = await ctx.request.body.json();
+            const validationResult = ApproveRejectSchema.safeParse(body);
+
+            if (!validationResult.success) {
+                ctx.response.status = 400;
+                ctx.response.body = {
+                    error: "Invalid request",
+                    details: validationResult.error.errors,
+                };
                 return;
             }
 
             const auth = ctx.state.auth as AuthContext;
 
-            // Update status to rejected
-            const homologation = await homologationRepository.updateStatus(
+            const result = await homologationService.markIncomplete(
                 id,
-                HomologationStatus.REJECTED,
                 auth.user.id,
+                validationResult.data.reason,
             );
 
-            // Create audit log
-            await auditLogRepository.create({
-                entityType: "Homologation",
-                entityId: id,
-                action: "REJECTED",
-                oldValues: { status: currentHomologation.status },
-                newValues: {
-                    status: HomologationStatus.REJECTED,
-                    reason: validationResult.data.reason,
-                },
-                createdBy: auth.user.id,
-            });
+            if (!result.success) {
+                const statusCode = result.code === "NOT_FOUND" ? 404 : 400;
+                ctx.response.status = statusCode;
+                ctx.response.body = {
+                    error: result.error,
+                    code: result.code,
+                };
+                return;
+            }
 
             ctx.response.status = 200;
-            ctx.response.body = homologation;
+            ctx.response.body = result.homologation;
         } catch (error) {
-            console.error("Reject homologation error:", error);
+            console.error("Mark incomplete error:", error);
+            ctx.response.status = 500;
+            ctx.response.body = { error: "Internal server error" };
+        }
+    }
+
+    /**
+     * POST /api/admin/homologations/:id/complete
+     * Mark a homologation as completed (admin only)
+     */
+    async complete(ctx: Context) {
+        try {
+            const id = ctx.params.id;
+
+            if (!id) {
+                ctx.response.status = 400;
+                ctx.response.body = { error: "Homologation ID is required" };
+                return;
+            }
+
+            const body = await ctx.request.body.json();
+            const validationResult = ApproveRejectSchema.safeParse(body);
+
+            if (!validationResult.success) {
+                ctx.response.status = 400;
+                ctx.response.body = {
+                    error: "Invalid request",
+                    details: validationResult.error.errors,
+                };
+                return;
+            }
+
+            const auth = ctx.state.auth as AuthContext;
+
+            const result = await homologationService.complete(
+                id,
+                auth.user.id,
+                validationResult.data.reason,
+            );
+
+            if (!result.success) {
+                const statusCode = result.code === "NOT_FOUND" ? 404 : 400;
+                ctx.response.status = statusCode;
+                ctx.response.body = {
+                    error: result.error,
+                    code: result.code,
+                };
+                return;
+            }
+
+            ctx.response.status = 200;
+            ctx.response.body = result.homologation;
+        } catch (error) {
+            console.error("Complete homologation error:", error);
             ctx.response.status = 500;
             ctx.response.body = { error: "Internal server error" };
         }

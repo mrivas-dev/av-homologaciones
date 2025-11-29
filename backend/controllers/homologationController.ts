@@ -1,5 +1,7 @@
 import type { Context } from "../deps.ts";
 import { HomologationRepository } from "../repositories/homologationRepository.ts";
+import { AuditLogRepository } from "../repositories/auditLogRepository.ts";
+import { HomologationService } from "../services/homologationService.ts";
 import {
     HomologationSchema,
     HomologationStatus,
@@ -13,6 +15,8 @@ import type { AuthContext } from "../types/auth.types.ts";
 import { z } from "../deps.ts";
 
 const homologationRepository = new HomologationRepository();
+const auditLogRepository = new AuditLogRepository();
+const homologationService = new HomologationService();
 
 // Validation schema for update (all fields optional)
 const UpdateHomologationSchema = z.object({
@@ -75,6 +79,21 @@ export class HomologationController {
                 data,
                 userId,
             );
+
+            // Create audit log for new homologation
+            await auditLogRepository.create({
+                entityType: "Homologation",
+                entityId: homologation.id,
+                action: "CREATED",
+                oldValues: undefined,
+                newValues: {
+                    ownerFullName: data.ownerFullName,
+                    ownerEmail: data.ownerEmail,
+                    trailerType: data.trailerType,
+                    status: homologation.status,
+                },
+                createdBy: userId,
+            });
 
             ctx.response.status = 201;
             ctx.response.body = homologation;
@@ -177,6 +196,14 @@ export class HomologationController {
             const userId = auth?.user.id ||
                 "00000000-0000-0000-0000-000000000000";
 
+            // Get current values for audit log
+            const currentHomologation = await homologationRepository.findById(id);
+            if (!currentHomologation) {
+                ctx.response.status = 404;
+                ctx.response.body = { error: "Homologation not found" };
+                return;
+            }
+
             const homologation = await homologationRepository.update(
                 id,
                 data,
@@ -188,6 +215,20 @@ export class HomologationController {
                 ctx.response.body = { error: "Homologation not found" };
                 return;
             }
+
+            // Create audit log for update
+            await auditLogRepository.create({
+                entityType: "Homologation",
+                entityId: id,
+                action: "UPDATED",
+                oldValues: {
+                    ownerFullName: currentHomologation.ownerFullName,
+                    ownerEmail: currentHomologation.ownerEmail,
+                    trailerType: currentHomologation.trailerType,
+                },
+                newValues: data,
+                createdBy: userId,
+            });
 
             ctx.response.status = 200;
             ctx.response.body = homologation;
@@ -212,6 +253,14 @@ export class HomologationController {
                 return;
             }
 
+            // Get current homologation for audit log
+            const currentHomologation = await homologationRepository.findById(id);
+            if (!currentHomologation) {
+                ctx.response.status = 404;
+                ctx.response.body = { error: "Homologation not found" };
+                return;
+            }
+
             const auth = ctx.state.auth as AuthContext;
             const success = await homologationRepository.softDelete(
                 id,
@@ -223,6 +272,20 @@ export class HomologationController {
                 ctx.response.body = { error: "Homologation not found" };
                 return;
             }
+
+            // Create audit log for deletion
+            await auditLogRepository.create({
+                entityType: "Homologation",
+                entityId: id,
+                action: "DELETED",
+                oldValues: {
+                    ownerFullName: currentHomologation.ownerFullName,
+                    ownerEmail: currentHomologation.ownerEmail,
+                    status: currentHomologation.status,
+                },
+                newValues: undefined,
+                createdBy: auth.user.id,
+            });
 
             ctx.response.status = 200;
             ctx.response.body = {
@@ -237,7 +300,7 @@ export class HomologationController {
 
     /**
      * PATCH /api/homologations/:id/status
-     * Update homologation status (admin only)
+     * Update homologation status with transition validation
      */
     async updateStatus(ctx: Context) {
         try {
@@ -262,25 +325,76 @@ export class HomologationController {
                 return;
             }
 
-            const { status } = validationResult.data;
+            const { status, reason } = validationResult.data;
 
-            const auth = ctx.state.auth as AuthContext;
-            const homologation = await homologationRepository.updateStatus(
+            const auth = ctx.state.auth as AuthContext | undefined;
+            const userId = auth?.user.id || "00000000-0000-0000-0000-000000000000";
+            const isAdmin = auth?.user.role === "admin";
+
+            // Use HomologationService for status transition with validation
+            const result = await homologationService.transitionStatus(
                 id,
                 status,
-                auth.user.id,
+                userId,
+                isAdmin,
+                reason,
             );
 
-            if (!homologation) {
-                ctx.response.status = 404;
-                ctx.response.body = { error: "Homologation not found" };
+            if (!result.success) {
+                const statusCode = result.code === "NOT_FOUND" ? 404 :
+                    result.code === "REQUIRES_ADMIN" ? 403 : 400;
+
+                ctx.response.status = statusCode;
+                ctx.response.body = {
+                    error: result.error,
+                    code: result.code,
+                };
                 return;
             }
 
             ctx.response.status = 200;
-            ctx.response.body = homologation;
+            ctx.response.body = result.homologation;
         } catch (error) {
             console.error("Update status error:", error);
+            ctx.response.status = 500;
+            ctx.response.body = { error: "Internal server error" };
+        }
+    }
+
+    /**
+     * POST /api/homologations/:id/submit
+     * Submit homologation for review (convenience endpoint)
+     */
+    async submit(ctx: Context) {
+        try {
+            const id = ctx.params.id;
+
+            if (!id) {
+                ctx.response.status = 400;
+                ctx.response.body = { error: "Homologation ID is required" };
+                return;
+            }
+
+            const auth = ctx.state.auth as AuthContext | undefined;
+            const userId = auth?.user.id || "00000000-0000-0000-0000-000000000000";
+
+            const result = await homologationService.submitForReview(id, userId);
+
+            if (!result.success) {
+                const statusCode = result.code === "NOT_FOUND" ? 404 : 400;
+
+                ctx.response.status = statusCode;
+                ctx.response.body = {
+                    error: result.error,
+                    code: result.code,
+                };
+                return;
+            }
+
+            ctx.response.status = 200;
+            ctx.response.body = result.homologation;
+        } catch (error) {
+            console.error("Submit homologation error:", error);
             ctx.response.status = 500;
             ctx.response.body = { error: "Internal server error" };
         }

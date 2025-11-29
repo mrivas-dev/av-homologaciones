@@ -9,6 +9,52 @@ const photoRepository = new PhotoRepository();
 const UPLOAD_DIR = Deno.env.get("UPLOAD_DIR") || "./uploads";
 const MAX_FILE_SIZE = parseInt(Deno.env.get("MAX_FILE_SIZE") || "10485760"); // 10MB default
 
+// Allowed MIME types for photo uploads
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "application/pdf", // For ID documents
+];
+
+// Allowed file extensions
+const ALLOWED_EXTENSIONS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "heic",
+  "heif",
+  "pdf",
+];
+
+/**
+ * Validate file type based on MIME type and extension
+ */
+function validateFileType(file: File): { valid: boolean; error?: string } {
+  const mimeType = file.type.toLowerCase();
+  const extension = file.name.split(".").pop()?.toLowerCase() || "";
+
+  if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+    return {
+      valid: false,
+      error: `Invalid file type: ${mimeType}. Allowed types: ${ALLOWED_MIME_TYPES.join(", ")}`,
+    };
+  }
+
+  if (!ALLOWED_EXTENSIONS.includes(extension)) {
+    return {
+      valid: false,
+      error: `Invalid file extension: .${extension}. Allowed extensions: ${ALLOWED_EXTENSIONS.join(", ")}`,
+    };
+  }
+
+  return { valid: true };
+}
+
 // Ensure upload directory exists
 try {
     await Deno.mkdir(UPLOAD_DIR, { recursive: true });
@@ -74,6 +120,16 @@ export class PhotoController {
                 ctx.response.body = {
                     error:
                         `File size exceeds maximum allowed size of ${MAX_FILE_SIZE} bytes`,
+                };
+                return;
+            }
+
+            // Validate file type
+            const fileTypeValidation = validateFileType(file);
+            if (!fileTypeValidation.valid) {
+                ctx.response.status = 415;
+                ctx.response.body = {
+                    error: fileTypeValidation.error,
                 };
                 return;
             }

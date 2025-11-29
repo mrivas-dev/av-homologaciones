@@ -76,13 +76,30 @@
 - [x] `POST /api/admin/homologations/:id/approve` - Approve homologation
 - [x] `POST /api/admin/homologations/:id/reject` - Reject homologation
 
-## Phase 5: Business Logic
+## Phase 5: Business Logic (Completed ✅)
 
-- [ ] Implement status transition logic
-- [ ] Add validation rules
-- [ ] Set up file upload handling
-- [ ] Implement audit logging
-- [ ] Add notification system
+- [x] Implement status transition logic
+  - [x] Created HomologationService with state machine
+  - [x] Valid transitions: Draft → Pending Review → Payed → Approved → Completed
+  - [x] Admin-only transitions for approve/reject/complete
+  - [x] Validation for required fields before submission
+- [x] Add validation rules
+  - [x] File type validation for photo uploads (jpeg, png, webp, heic, pdf)
+  - [x] File size validation (max 10MB configurable)
+  - [x] Required fields validation for submission
+- [x] Set up file upload handling
+  - [x] Multipart form data handling
+  - [x] Unique filename generation
+  - [x] File storage with disk cleanup on delete
+- [x] Implement audit logging
+  - [x] Audit logs for create, update, delete operations
+  - [x] Audit logs for all status transitions
+  - [x] Stores old and new values for changes
+- [x] Add notification system
+  - [x] Email templates for all status changes
+  - [x] HTML and plain text email support
+  - [x] SMTP configuration via environment variables
+  - [x] Graceful fallback when SMTP not configured
 
 ## Phase 6: Testing
 
@@ -121,6 +138,11 @@
   - ✅ Homologation CRUD operations
   - ✅ Photo upload and management
   - ✅ Admin approval workflows with audit logging
+- ✅ **Phase 5: Business Logic implementation**
+  - ✅ HomologationService with status transition validation
+  - ✅ File type validation for photo uploads
+  - ✅ Comprehensive audit logging across all operations
+  - ✅ NotificationService with email templates
 
 ## Immediate Next Steps
 
@@ -135,8 +157,10 @@
 9. [x] Start Docker MySQL container
 10. [x] Run database migrations
 11. [x] Test all API endpoints
-12. [/] Test admin approval workflows
-13. [ ] Begin Phase 5: Business Logic implementation
+12. [x] Test admin approval workflows
+13. [x] Complete Phase 5: Business Logic implementation
+14. [ ] Begin Phase 6: Testing (API integration tests)
+15. [ ] Begin Phase 7: Documentation (API docs, setup guide)
 
 ## Pending Tasks
 
@@ -146,13 +170,33 @@
 - [ ] Set up database backup strategy
 - [x] Create seed data for development
 - [x] Document database schema
-- [ ] Add comprehensive input validation for all API endpoints
+- [x] Add comprehensive input validation for all API endpoints
 - [x] Implement soft delete functionality (in repositories)
 - [ ] Set up database migrations for production
-- [ ] Add file type validation for photo uploads
+- [x] Add file type validation for photo uploads
 - [ ] Implement rate limiting
-- [ ] Add comprehensive error handling
+- [x] Add comprehensive error handling
+
+## New API Endpoints (Phase 5)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/homologations/:id/submit` | POST | Submit homologation for review |
+| `/api/admin/homologations/:id/incomplete` | POST | Mark as incomplete |
+| `/api/admin/homologations/:id/complete` | POST | Mark as completed |
+
+## Status Transition Rules
+
+```
+Draft → Pending Review (requires: all fields + at least 1 photo)
+Pending Review → Payed / Incomplete / Rejected
+Payed → Approved / Rejected / Incomplete
+Incomplete → Pending Review / Rejected
+Approved → Completed
+Rejected → (terminal state)
+Completed → (terminal state)
+```
 
 ---
 
-_Last Updated: 2025-11-28 9:10 PM_
+_Last Updated: 2025-11-29_

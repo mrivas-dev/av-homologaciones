@@ -24,5 +24,17 @@ router.post(
     requireAdmin,
     (ctx) => adminController.reject(ctx),
 );
+router.post(
+    "/api/admin/homologations/:id/incomplete",
+    requireAuth,
+    requireAdmin,
+    (ctx) => adminController.markIncomplete(ctx),
+);
+router.post(
+    "/api/admin/homologations/:id/complete",
+    requireAuth,
+    requireAdmin,
+    (ctx) => adminController.complete(ctx),
+);
 
 export default router;
