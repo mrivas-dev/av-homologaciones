@@ -77,8 +77,15 @@ This will start:
 
 ## API Endpoints
 
-- `GET /api/hello` - Returns a welcome message
-- `GET /api/messages` - Returns a list of messages
+See [docs/api/endpoints.md](./docs/api/endpoints.md) for complete API documentation.
+
+### Main Endpoints
+- `POST /api/auth/login` - User authentication
+- `POST /api/homologations` - Create new homologation
+- `GET /api/homologations` - List homologations
+- `POST /api/photos` - Upload photo
+- `GET /uploads/:fileName` - Serve uploaded photo file
+- `GET /api/admin/homologations` - Admin: List all homologations
 
 ## License
 
