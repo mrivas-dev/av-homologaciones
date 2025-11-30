@@ -1,7 +1,7 @@
 {
   "nodeModulesDir": "auto",
   "tasks": {
-    "dev": "deno run --allow-net --allow-env --allow-read --allow-sys main.ts"
+    "dev": "deno run --allow-net --allow-env --allow-read --allow-write --allow-sys main.ts"
   },
   "compilerOptions": {
     "strict": true,
