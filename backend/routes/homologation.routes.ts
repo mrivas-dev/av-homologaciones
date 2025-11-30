@@ -28,34 +28,38 @@ router.get(
     optionalAuth,
     (ctx) => homologationController.list(ctx),
 );
+// UUID regex pattern to prevent matching non-UUID paths like "lookup"
+const uuidPattern =
+    "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+
 router.get(
-    "/api/homologations/:id",
+    `/api/homologations/:id(${uuidPattern})`,
     optionalAuth,
     (ctx) => homologationController.getById(ctx),
 );
 router.patch(
-    "/api/homologations/:id",
+    `/api/homologations/:id(${uuidPattern})`,
     optionalAuth,
     (ctx) => homologationController.update(ctx),
 );
 
 // Submit for review (public route, service handles validation)
 router.post(
-    "/api/homologations/:id/submit",
+    `/api/homologations/:id(${uuidPattern})/submit`,
     optionalAuth,
     (ctx) => homologationController.submit(ctx),
 );
 
 // Status update (with optional auth - service validates admin for restricted transitions)
 router.patch(
-    "/api/homologations/:id/status",
+    `/api/homologations/:id(${uuidPattern})/status`,
     optionalAuth,
     (ctx) => homologationController.updateStatus(ctx),
 );
 
 // Admin-only routes
 router.delete(
-    "/api/homologations/:id",
+    `/api/homologations/:id(${uuidPattern})`,
     requireAuth,
     requireAdmin,
     (ctx) => homologationController.delete(ctx),
