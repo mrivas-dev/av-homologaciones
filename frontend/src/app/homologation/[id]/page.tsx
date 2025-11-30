@@ -2,14 +2,14 @@
 
 import { useEffect, useState, useCallback, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useParams } from 'next/navigation';
-import { 
-  getHomologationById, 
+import {
+  getHomologationById,
   updateHomologation,
   createPayment,
   getPhotos,
-  Homologation, 
+  Homologation,
   Photo,
-  ApiError 
+  ApiError
 } from '../../../utils/api';
 import { FiCheck, FiLoader, FiAlertCircle, FiSave, FiCreditCard } from 'react-icons/fi';
 import TrailerInfoForm, { TrailerFormData } from '../../../components/homologation/TrailerInfoForm';
@@ -30,12 +30,12 @@ const steps: Step[] = [
 ];
 
 // Stepper Component
-function WizardStepper({ 
-  currentStep, 
+function WizardStepper({
+  currentStep,
   onStepClick,
   disabled,
-}: { 
-  currentStep: number; 
+}: {
+  currentStep: number;
   onStepClick: (step: number) => void;
   disabled?: boolean;
 }) {
@@ -56,10 +56,10 @@ function WizardStepper({
                 className={`
                   relative flex items-center justify-center w-12 h-12 rounded-full 
                   border-2 transition-all duration-300 ease-in-out
-                  ${currentStep === step.id 
-                    ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30' 
-                    : currentStep > step.id 
-                      ? 'bg-emerald-500 border-emerald-500' 
+                  ${currentStep === step.id
+                    ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30'
+                    : currentStep > step.id
+                      ? 'bg-emerald-500 border-emerald-500'
                       : 'bg-slate-800 border-slate-600 group-hover:border-slate-500'
                   }
                 `}
@@ -67,23 +67,21 @@ function WizardStepper({
                 {currentStep > step.id ? (
                   <FiCheck className="w-5 h-5 text-white" />
                 ) : (
-                  <span className={`text-sm font-semibold ${
-                    currentStep === step.id ? 'text-white' : 'text-slate-400'
-                  }`}>
+                  <span className={`text-sm font-semibold ${currentStep === step.id ? 'text-white' : 'text-slate-400'
+                    }`}>
                     {step.id}
                   </span>
                 )}
               </div>
-              
+
               {/* Step Label */}
               <div className="mt-3 text-center">
-                <p className={`text-sm font-medium transition-colors ${
-                  currentStep === step.id 
-                    ? 'text-amber-400' 
-                    : currentStep > step.id 
-                      ? 'text-emerald-400' 
+                <p className={`text-sm font-medium transition-colors ${currentStep === step.id
+                    ? 'text-amber-400'
+                    : currentStep > step.id
+                      ? 'text-emerald-400'
                       : 'text-slate-400 group-hover:text-slate-300'
-                }`}>
+                  }`}>
                   {step.name}
                 </p>
                 <p className="text-xs text-slate-500 mt-0.5 max-w-[140px]">
@@ -96,9 +94,8 @@ function WizardStepper({
             {index < steps.length - 1 && (
               <div className="flex items-center mx-4 mb-10">
                 <div
-                  className={`h-0.5 w-20 lg:w-32 transition-colors duration-300 ${
-                    currentStep > step.id ? 'bg-emerald-500' : 'bg-slate-700'
-                  }`}
+                  className={`h-0.5 w-20 lg:w-32 transition-colors duration-300 ${currentStep > step.id ? 'bg-emerald-500' : 'bg-slate-700'
+                    }`}
                 />
               </div>
             )}
@@ -118,10 +115,10 @@ function WizardStepper({
                 className={`
                   flex items-center justify-center w-10 h-10 rounded-full 
                   border-2 transition-all duration-300
-                  ${currentStep === step.id 
-                    ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30' 
-                    : currentStep > step.id 
-                      ? 'bg-emerald-500 border-emerald-500' 
+                  ${currentStep === step.id
+                    ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30'
+                    : currentStep > step.id
+                      ? 'bg-emerald-500 border-emerald-500'
                       : 'bg-slate-800 border-slate-600'
                   }
                 `}
@@ -129,25 +126,23 @@ function WizardStepper({
                 {currentStep > step.id ? (
                   <FiCheck className="w-4 h-4 text-white" />
                 ) : (
-                  <span className={`text-sm font-semibold ${
-                    currentStep === step.id ? 'text-white' : 'text-slate-400'
-                  }`}>
+                  <span className={`text-sm font-semibold ${currentStep === step.id ? 'text-white' : 'text-slate-400'
+                    }`}>
                     {step.id}
                   </span>
                 )}
               </button>
-              
+
               {index < steps.length - 1 && (
                 <div
-                  className={`flex-1 h-0.5 mx-2 transition-colors duration-300 ${
-                    currentStep > step.id ? 'bg-emerald-500' : 'bg-slate-700'
-                  }`}
+                  className={`flex-1 h-0.5 mx-2 transition-colors duration-300 ${currentStep > step.id ? 'bg-emerald-500' : 'bg-slate-700'
+                    }`}
                 />
               )}
             </div>
           ))}
         </div>
-        
+
         {/* Current Step Label */}
         <div className="text-center">
           <p className="text-sm font-medium text-amber-400">
@@ -181,7 +176,7 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
   onHomologationUpdate: (data: Homologation) => void;
   onPhotosChange: (photos: Photo[]) => void;
   onSavingChange: (isSaving: boolean) => void;
-}>(function GeneralInfoStep({ 
+}>(function GeneralInfoStep({
   homologation,
   photos,
   onHomologationUpdate,
@@ -209,13 +204,13 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
 
   // Track changes
   useEffect(() => {
-    const trailerChanged = 
+    const trailerChanged =
       trailerData.trailerType !== (homologation.trailerType || '') ||
       trailerData.trailerDimensions !== (homologation.trailerDimensions || '') ||
       trailerData.trailerNumberOfAxles !== (homologation.trailerNumberOfAxles || '') ||
       trailerData.trailerLicensePlateNumber !== (homologation.trailerLicensePlateNumber || '');
-    
-    const ownerChanged = 
+
+    const ownerChanged =
       ownerData.ownerFullName !== (homologation.ownerFullName || '') ||
       ownerData.ownerEmail !== (homologation.ownerEmail || '');
 
@@ -251,11 +246,11 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
         ownerFullName: ownerData.ownerFullName || undefined,
         ownerEmail: ownerData.ownerEmail || undefined,
       });
-      
+
       onHomologationUpdate(updated);
       setHasChanges(false);
       setSaveMessage({ type: 'success', text: 'Cambios guardados automáticamente' });
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage(null), 3000);
       return true;
@@ -285,11 +280,10 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {saveMessage && (
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
-              saveMessage.type === 'success' 
-                ? 'bg-emerald-500/10 text-emerald-400' 
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${saveMessage.type === 'success'
+                ? 'bg-emerald-500/10 text-emerald-400'
                 : 'bg-red-500/10 text-red-400'
-            }`}>
+              }`}>
               {saveMessage.type === 'success' ? (
                 <FiCheck className="w-4 h-4" />
               ) : (
@@ -299,7 +293,7 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
             </div>
           )}
         </div>
-        
+
         <button
           onClick={handleManualSave}
           disabled={isSaving || !hasChanges}
@@ -371,7 +365,7 @@ function PaymentStep({
     try {
       // Create a payment record instead of changing status
       await createPayment(homologation.id, PRICE, 'MercadoPago');
-      
+
       // Refresh homologation data to get updated isPaid status
       const updated = await getHomologationById(homologation.id);
       onHomologationUpdate(updated);
@@ -464,11 +458,13 @@ function PaymentStep({
               </>
             ) : (
               <>
-                {/* MercadoPago Logo - Simple circle with MP */}
+                {/* MercadoPago Logo */}
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                    <span className="text-[#009EE3] text-xs font-bold">MP</span>
-                  </div>
+                  <img
+                    src="/mercadopago-logo.jpeg"
+                    alt="MercadoPago"
+                    className="h-6 w-auto"
+                  />
                   <span>Pagar con MercadoPago</span>
                 </div>
               </>
@@ -517,28 +513,28 @@ export default function HomologationTrackingPage() {
   const generalInfoRef = useRef<GeneralInfoStepHandle>(null);
 
   const fetchData = useCallback(async () => {
-      if (!id) return;
+    if (!id) return;
 
-      try {
-        setLoading(true);
-        setError(null);
-      
+    try {
+      setLoading(true);
+      setError(null);
+
       // Fetch homologation and photos in parallel
       const [homologationData, photosData] = await Promise.all([
         getHomologationById(id),
         getPhotos(id),
       ]);
-      
+
       setHomologation(homologationData);
       setPhotos(photosData.data);
-      } catch (err) {
-        if (err instanceof ApiError) {
-          setError(err.message);
-        } else {
-          setError('Error al cargar la homologación');
-        }
-      } finally {
-        setLoading(false);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Error al cargar la homologación');
+      }
+    } finally {
+      setLoading(false);
     }
   }, [id]);
 
@@ -549,7 +545,7 @@ export default function HomologationTrackingPage() {
   // Auto-save before step change
   const autoSaveAndNavigate = async (targetStep: number) => {
     if (currentStep === targetStep) return;
-    
+
     // Only auto-save if we're on step 1 (the form step)
     if (currentStep === 1 && generalInfoRef.current) {
       const hasChanges = generalInfoRef.current.hasUnsavedChanges();
@@ -557,14 +553,14 @@ export default function HomologationTrackingPage() {
         setIsAutoSaving(true);
         const success = await generalInfoRef.current.saveChanges();
         setIsAutoSaving(false);
-        
+
         if (!success) {
           // If save failed, don't navigate
           return;
         }
       }
     }
-    
+
     setCurrentStep(targetStep);
   };
 
@@ -603,9 +599,9 @@ export default function HomologationTrackingPage() {
     switch (currentStep) {
       case 1:
         return (
-          <GeneralInfoStep 
+          <GeneralInfoStep
             ref={generalInfoRef}
-            homologation={homologation} 
+            homologation={homologation}
             photos={photos}
             onHomologationUpdate={handleHomologationUpdate}
             onPhotosChange={handlePhotosChange}
@@ -614,7 +610,7 @@ export default function HomologationTrackingPage() {
         );
       case 2:
         return (
-          <PaymentStep 
+          <PaymentStep
             homologation={homologation}
             onHomologationUpdate={handleHomologationUpdate}
           />
@@ -698,8 +694,8 @@ export default function HomologationTrackingPage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Wizard Stepper */}
         <div className="mb-10">
-          <WizardStepper 
-            currentStep={currentStep} 
+          <WizardStepper
+            currentStep={currentStep}
             onStepClick={handleStepClick}
             disabled={isAutoSaving}
           />
@@ -752,7 +748,7 @@ export default function HomologationTrackingPage() {
               'Siguiente'
             )}
           </button>
-      </div>
+        </div>
       </main>
     </div>
   );
