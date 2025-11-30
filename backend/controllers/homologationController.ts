@@ -1,6 +1,7 @@
 import type { Context } from "../deps.ts";
 import { HomologationRepository } from "../repositories/homologationRepository.ts";
 import { AuditLogRepository } from "../repositories/auditLogRepository.ts";
+import { PaymentRepository } from "../repositories/paymentRepository.ts";
 import { HomologationService } from "../services/homologationService.ts";
 import {
     HomologationSchema,
@@ -16,6 +17,7 @@ import { z } from "../deps.ts";
 
 const homologationRepository = new HomologationRepository();
 const auditLogRepository = new AuditLogRepository();
+const paymentRepository = new PaymentRepository();
 const homologationService = new HomologationService();
 
 // Validation schema for update (all fields optional)
@@ -153,8 +155,18 @@ export class HomologationController {
                 return;
             }
 
+            // Get payment status
+            const isPaid = await paymentRepository.hasPayment(id);
+            const payments = await paymentRepository.findByHomologationId(id);
+            const totalPaid = await paymentRepository.getTotalPaid(id);
+
             ctx.response.status = 200;
-            ctx.response.body = homologation;
+            ctx.response.body = {
+                ...homologation,
+                isPaid,
+                payments,
+                totalPaid,
+            };
         } catch (error) {
             console.error("Get homologation error:", error);
             ctx.response.status = 500;

@@ -6,6 +6,7 @@ import { initializeDatabase } from "./config/db.ts";
 import authRoutes from "./routes/auth.routes.ts";
 import homologationRoutes from "./routes/homologation.routes.ts";
 import photoRoutes from "./routes/photo.routes.ts";
+import paymentRoutes from "./routes/payment.routes.ts";
 import adminRoutes from "./routes/admin.routes.ts";
 
 // Initialize application
@@ -86,6 +87,9 @@ app.use(homologationRoutes.allowedMethods());
 app.use(photoRoutes.routes());
 app.use(photoRoutes.allowedMethods());
 
+app.use(paymentRoutes.routes());
+app.use(paymentRoutes.allowedMethods());
+
 app.use(adminRoutes.routes());
 app.use(adminRoutes.allowedMethods());
 
@@ -97,6 +101,7 @@ console.log("  - Health: GET /api/health");
 console.log("  - Auth: POST /api/auth/login, /api/auth/register");
 console.log("  - Homologations: /api/homologations");
 console.log("  - Photos: /api/photos");
+console.log("  - Payments: /api/payments");
 console.log("  - Admin: /api/admin/homologations");
 
 await app.listen({ port: PORT });
