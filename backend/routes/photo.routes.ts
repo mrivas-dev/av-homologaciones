@@ -78,11 +78,9 @@ router.get(
     (ctx) => photoController.getById(ctx),
 );
 
-// Admin-only routes
+// Delete photo - public route (no authentication required)
 router.delete(
     "/api/photos/:id",
-    requireAuth,
-    requireAdmin,
     (ctx) => photoController.delete(ctx),
 );
 

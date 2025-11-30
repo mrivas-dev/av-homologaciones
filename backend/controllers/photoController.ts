@@ -234,7 +234,7 @@ export class PhotoController {
 
     /**
      * DELETE /api/photos/:id
-     * Remove photo (admin only)
+     * Remove photo (public - users can delete their own photos)
      */
     async delete(ctx: Context) {
         try {
@@ -255,8 +255,11 @@ export class PhotoController {
                 return;
             }
 
-            const auth = ctx.state.auth as AuthContext;
-            const success = await photoRepository.delete(id, auth.user.id);
+            // Get user ID (optional auth - use default for public users)
+            const auth = ctx.state.auth as AuthContext | undefined;
+            const userId = auth?.user.id || "00000000-0000-0000-0000-000000000000";
+
+            const success = await photoRepository.delete(id, userId);
 
             if (!success) {
                 ctx.response.status = 404;
