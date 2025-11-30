@@ -36,9 +36,11 @@ The page follows the [Wizard UI Pattern](https://www.eleken.co/blog-posts/wizard
 
 | Step | Name | Description | Status |
 |------|------|-------------|--------|
-| 1 | Información General | Display homologation data | ✅ Implemented |
+| 1 | Información General | Trailer info form + Photo upload | ✅ Completed |
 | 2 | Pago | Payment processing | 🔜 Coming soon |
 | 3 | Revisión | Final review and approval | 🔜 Coming soon |
+
+> 📋 See [Step 1 Form Plan](./step1-form-plan.md) for detailed implementation plan.
 
 ### Visual States
 
@@ -53,19 +55,39 @@ The wizard stepper uses visual cues to indicate step status:
 ### Current Implementation
 
 #### Step 1: Información General
-Displays all available homologation information:
-- ID (UUID)
-- Status
-- Owner phone number
-- Owner national ID (DNI/CUIT)
-- Owner full name (if available)
-- Owner email (if available)
-- Trailer type (if available)
-- Trailer dimensions (if available)
-- Number of axles (if available)
-- License plate (if available)
-- Created/Updated timestamps
-- Version number
+
+Step 1 is being enhanced to include an editable form and photo upload. See [Step 1 Form Plan](./step1-form-plan.md) for full details.
+
+**Trailer Information Form:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `trailerType` | Dropdown | ✅ | "Trailer", "Rolling Box", "Motorhome" |
+| `trailerDimensions` | Text | ✅ | e.g., "4x2m" |
+| `trailerNumberOfAxles` | Number | ✅ | 1-10 |
+| `trailerLicensePlateNumber` | Text | ✅ | License plate number |
+
+**Owner Information Form:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `ownerFullName` | Text | ✅ | Full legal name |
+| `ownerEmail` | Email | ❌ | Contact email |
+| `ownerNationalId` | Read-only | - | Pre-filled from lookup |
+| `ownerPhone` | Read-only | - | Pre-filled from lookup |
+
+**Photo Upload:**
+- Up to 6 photos
+- Supported formats: JPEG, PNG, WebP, HEIC, PDF
+- Max file size: 10MB per file
+- Drag-and-drop or click to upload
+- Thumbnail gallery with delete option
+- Upload progress indicator
+
+**Auto-Save Functionality:**
+- Changes are automatically saved when navigating between steps
+- Manual save button available for explicit saves
+- Visual indicator shows when auto-save is in progress
+- Navigation is disabled during save operations
+- If save fails, navigation is prevented and error is shown
 
 #### Step 2: Pago
 Placeholder for payment functionality (coming soon)
@@ -138,37 +160,47 @@ Possible homologation statuses (defined in `backend/types/homologation.types.ts`
 | File | Description |
 |------|-------------|
 | `frontend/src/app/homologation/[id]/page.tsx` | Main page component with wizard logic |
-| `frontend/src/utils/api.ts` | API client with `getHomologationById()` |
+| `frontend/src/utils/api.ts` | API client with CRUD functions |
 | `frontend/src/components/sections/HeroSection.tsx` | Form that redirects to tracking page |
+| `frontend/src/components/homologation/TrailerInfoForm.tsx` | Trailer information form |
+| `frontend/src/components/homologation/OwnerInfoForm.tsx` | Owner information form |
+| `frontend/src/components/homologation/PhotoUpload.tsx` | Photo upload component with integrated gallery |
+| `frontend/src/components/homologation/index.ts` | Component exports |
 
 ### Component Structure
 
 ```
 HomologationTrackingPage
-├── WizardStepper         # Horizontal step indicator
-├── GeneralInfoStep       # Step 1 content
-├── PaymentStep           # Step 2 content (placeholder)
-└── ReviewStep            # Step 3 content (placeholder)
+├── WizardStepper              # Horizontal step indicator (with auto-save disabled state)
+├── GeneralInfoStep            # Step 1 content (with ref for auto-save)
+│   ├── TrailerInfoForm        # Trailer details form
+│   ├── OwnerInfoForm          # Owner details form  
+│   └── PhotoUpload            # Drag-drop upload zone + thumbnail gallery
+├── PaymentStep                # Step 2 content (placeholder)
+└── ReviewStep                 # Step 3 content (placeholder)
 ```
 
 ### State Management
 
 - `currentStep`: Tracks the active wizard step (1-3)
 - `homologation`: Stores the fetched homologation data
+- `photos`: Stores uploaded photos for the homologation
 - `loading`: Loading state for API call
 - `error`: Error state for API failures
+- `isAutoSaving`: Tracks auto-save operation in progress
+- Form state: Managed within `GeneralInfoStep` component with change tracking
 
 ### Navigation
 
 - **Step clicking**: Users can click on any step indicator to navigate
 - **Next/Back buttons**: Sequential navigation with disabled states at boundaries
 - **Step counter**: Shows current position (e.g., "Paso 1 de 3")
+- **Auto-save**: Changes are automatically saved when navigating between steps
 
-### API Endpoint Used
+### API Endpoints Used
 
-```
-GET /api/homologations/:id
-```
+#### GET /api/homologations/:id
+Get homologation by ID
 
 **Response:**
 ```json
@@ -189,12 +221,95 @@ GET /api/homologations/:id
 }
 ```
 
+#### PATCH /api/homologations/:id
+Update homologation fields (used for auto-save and manual save)
+
+**Request Body:**
+```json
+{
+  "trailerType": "Trailer",
+  "trailerDimensions": "4x2m",
+  "trailerNumberOfAxles": 2,
+  "trailerLicensePlateNumber": "ABC123",
+  "ownerFullName": "John Doe",
+  "ownerEmail": "john@example.com"
+}
+```
+
+#### POST /api/photos
+Upload photo for homologation
+
+**Request:** multipart/form-data
+- `file`: The photo file
+- `homologationId`: UUID of the homologation
+- `isIdDocument`: boolean (optional)
+
+**Response:**
+```json
+{
+  "id": "photo-uuid",
+  "homologationId": "homologation-uuid",
+  "fileName": "photo.jpg",
+  "filePath": "./uploads/homologation-uuid_timestamp.jpg",
+  "fileSize": 1024000,
+  "mimeType": "image/jpeg",
+  "isIdDocument": false,
+  "createdAt": "2024-01-15T10:30:00Z"
+}
+```
+
+#### GET /api/photos/homologation/:homologationId
+Get all photos for a homologation
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "photo-uuid",
+      "homologationId": "homologation-uuid",
+      "fileName": "photo.jpg",
+      "filePath": "./uploads/homologation-uuid_timestamp.jpg",
+      "fileSize": 1024000,
+      "mimeType": "image/jpeg",
+      "isIdDocument": false,
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
 ### Component States
 
 1. **Loading:** Shows spinner while fetching data
 2. **Error:** Displays error message with icon if API fails
 3. **Not Found:** Shows message if homologation doesn't exist
 4. **Success:** Displays wizard with step content
+5. **Auto-saving:** Shows floating indicator when saving changes during navigation
+
+### Auto-Save Behavior
+
+The wizard implements automatic saving when navigating between steps:
+
+1. **Change Detection**: Form tracks changes by comparing current values with original data
+2. **Navigation Trigger**: When user clicks Next, Back, or any step indicator:
+   - System checks for unsaved changes
+   - If changes exist, automatically saves before navigating
+   - Shows "Guardando cambios..." indicator
+   - Disables navigation during save
+3. **Save Process**:
+   - Validates form data (email format, etc.)
+   - Calls `updateHomologation` API
+   - Updates local state on success
+   - Shows success message: "Cambios guardados automáticamente"
+4. **Error Handling**:
+   - If save fails, navigation is prevented
+   - Error message is displayed
+   - User can retry or fix validation errors
+5. **Manual Save**: Users can also click "Guardar cambios" button to save explicitly
+
+This ensures no data loss when users navigate between steps.
 
 ## Styling
 
@@ -210,10 +325,19 @@ The page uses Tailwind CSS with the project's dark theme:
 
 Planned features for future phases:
 
-### Step 1: Información General
-- [ ] Editable form fields for incomplete data
-- [ ] Photo upload functionality
-- [ ] Form validation
+### Step 1: Información General (✅ Completed)
+- [x] Wizard stepper UI
+- [x] TrailerInfoForm component
+- [x] OwnerInfoForm component  
+- [x] PhotoUpload component with drag-drop
+- [x] PhotoGallery component (integrated in PhotoUpload)
+- [x] Form validation
+- [x] API integration (updateHomologation, uploadPhoto, getPhotos)
+- [x] Auto-save functionality on step navigation
+- [x] Manual save button
+- [x] Change tracking and visual feedback
+
+> 📋 See [Step 1 Form Plan](./step1-form-plan.md) for full implementation details.
 
 ### Step 2: Pago
 - [ ] Payment gateway integration
@@ -246,6 +370,7 @@ Planned features for future phases:
 
 ## Related Documentation
 
+- [Step 1 Form Plan](./step1-form-plan.md) - Detailed implementation plan for Step 1
 - [Homologation Overview](../backend/homologation-overview.md)
 - [API Endpoints](../api/endpoints.md)
 - [Landing Page Plan](./landing-page-plan.md)
