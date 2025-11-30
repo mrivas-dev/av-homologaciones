@@ -159,9 +159,95 @@ export default function PhotoUpload({
         <FiCamera className="w-5 h-5 text-amber-400" />
         Fotos del Trailer
       </h3>
-      <p className="text-sm text-slate-400 mb-4">
+      <p className="text-sm text-slate-400 mb-6">
         Máximo {MAX_PHOTOS} fotos • JPG, PNG, WebP, HEIC, PDF • Max 10MB por archivo
       </p>
+
+      {/* Example Photos Section */}
+      <div className="mb-6">
+        <p className="text-sm font-medium text-slate-300 mb-3">
+          Ejemplos de fotos aceptadas:
+        </p>
+        <div className="grid grid-cols-3 gap-3">
+          {/* Frontal Example */}
+          <div className="flex flex-col items-center">
+            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-2">
+              <svg
+                viewBox="0 0 200 200"
+                className="w-full h-full"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Trailer body - front view */}
+                <rect x="50" y="60" width="100" height="80" fill="#475569" stroke="#64748b" strokeWidth="2" rx="4" />
+                {/* Door */}
+                <rect x="85" y="80" width="30" height="50" fill="#334155" stroke="#475569" strokeWidth="1.5" rx="2" />
+                <line x1="100" y1="80" x2="100" y2="130" stroke="#64748b" strokeWidth="1" />
+                {/* Wheels */}
+                <circle cx="70" cy="150" r="12" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+                <circle cx="130" cy="150" r="12" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+                {/* Wheel details */}
+                <circle cx="70" cy="150" r="6" fill="#475569" />
+                <circle cx="130" cy="150" r="6" fill="#475569" />
+              </svg>
+            </div>
+            <span className="text-xs text-slate-400">Frontal</span>
+          </div>
+
+          {/* Lateral Example */}
+          <div className="flex flex-col items-center">
+            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-2">
+              <svg
+                viewBox="0 0 200 200"
+                className="w-full h-full"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Trailer body - side view */}
+                <rect x="40" y="70" width="120" height="60" fill="#475569" stroke="#64748b" strokeWidth="2" rx="4" />
+                {/* Roof */}
+                <path d="M 40 70 L 50 50 L 150 50 L 160 70 Z" fill="#334155" stroke="#475569" strokeWidth="2" />
+                {/* Axles */}
+                <line x1="70" y1="130" x2="70" y2="145" stroke="#64748b" strokeWidth="3" />
+                <line x1="130" y1="130" x2="130" y2="145" stroke="#64748b" strokeWidth="3" />
+                {/* Wheels */}
+                <circle cx="70" cy="155" r="10" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+                <circle cx="130" cy="155" r="10" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+                {/* Wheel details */}
+                <circle cx="70" cy="155" r="5" fill="#475569" />
+                <circle cx="130" cy="155" r="5" fill="#475569" />
+              </svg>
+            </div>
+            <span className="text-xs text-slate-400">Lateral</span>
+          </div>
+
+          {/* Chasis Example */}
+          <div className="flex flex-col items-center">
+            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-2">
+              <svg
+                viewBox="0 0 200 200"
+                className="w-full h-full"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Chassis frame */}
+                <rect x="30" y="80" width="140" height="8" fill="#1e293b" stroke="#334155" strokeWidth="1" rx="2" />
+                <rect x="30" y="112" width="140" height="8" fill="#1e293b" stroke="#334155" strokeWidth="1" rx="2" />
+                {/* Cross members */}
+                <line x1="70" y1="80" x2="70" y2="120" stroke="#334155" strokeWidth="2" />
+                <line x1="130" y1="80" x2="130" y2="120" stroke="#334155" strokeWidth="2" />
+                {/* Axle beams */}
+                <rect x="60" y="95" width="20" height="6" fill="#475569" stroke="#64748b" strokeWidth="1" rx="1" />
+                <rect x="120" y="95" width="20" height="6" fill="#475569" stroke="#64748b" strokeWidth="1" rx="1" />
+                {/* Suspension */}
+                <path d="M 70 88 Q 70 95 70 100" stroke="#64748b" strokeWidth="2" fill="none" />
+                <path d="M 130 88 Q 130 95 130 100" stroke="#64748b" strokeWidth="2" fill="none" />
+              </svg>
+            </div>
+            <span className="text-xs text-slate-400">Chasis</span>
+          </div>
+        </div>
+      </div>
 
       {/* Error message */}
       {error && (
