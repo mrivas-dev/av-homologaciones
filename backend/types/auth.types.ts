@@ -1,9 +1,9 @@
 import { z } from "../deps.ts";
 
-// Login request schema
+// Login request schema - requires email
 export const LoginRequestSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(1),
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(1, "Password is required"),
 });
 
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;

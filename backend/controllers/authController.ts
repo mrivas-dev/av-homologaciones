@@ -38,7 +38,7 @@ export class AuthController {
 
             if (!result) {
                 ctx.response.status = 401;
-                ctx.response.body = { error: "Invalid email or password" };
+                ctx.response.body = { error: "Invalid credentials" };
                 return;
             }
 

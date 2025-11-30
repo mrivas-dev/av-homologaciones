@@ -106,7 +106,10 @@ export class AuthService {
      * Authenticate a user with email and password
      */
     async login(credentials: LoginRequest): Promise<LoginResponse | null> {
-        const user = await this.userRepository.findByEmail(credentials.email);
+        // Find user by email
+        const user = await this.userRepository.findByEmail(
+            credentials.email,
+        );
 
         if (!user) {
             return null;

@@ -329,7 +329,7 @@ export class HomologationController {
 
             const auth = ctx.state.auth as AuthContext | undefined;
             const userId = auth?.user.id || "00000000-0000-0000-0000-000000000000";
-            const isAdmin = auth?.user.role === "admin";
+            const isAdmin = auth?.user.role?.toLowerCase() === "admin";
 
             // Use HomologationService for status transition with validation
             const result = await homologationService.transitionStatus(

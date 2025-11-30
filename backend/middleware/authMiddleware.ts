@@ -55,9 +55,25 @@ export const requireAuth: Middleware = async (ctx: Context, next) => {
 export const requireAdmin: Middleware = async (ctx: Context, next) => {
     const auth = ctx.state.auth as AuthContext | undefined;
 
-    if (!auth || auth.user.role !== "Admin") {
+    if (!auth) {
         ctx.response.status = 403;
-        ctx.response.body = { error: "Forbidden: Admin access required" };
+        ctx.response.body = { error: "Forbidden: Authentication required" };
+        return;
+    }
+
+    // Normalize role: trim whitespace and convert to lowercase
+    const userRole = auth.user.role?.trim().toLowerCase();
+    const isAdmin = userRole === "admin";
+
+    if (!isAdmin) {
+        console.error(
+            `Admin access denied for user ${auth.user.email}. Role: "${auth.user.role}" (normalized: "${userRole}")`,
+        );
+        ctx.response.status = 403;
+        ctx.response.body = {
+            error: "Forbidden: Admin access required",
+            role: auth.user.role, // Include role in response for debugging
+        };
         return;
     }
 
