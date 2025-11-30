@@ -174,6 +174,36 @@ export async function submitHomologation(id: string): Promise<Homologation> {
   return data as Homologation;
 }
 
+/**
+ * Update homologation status
+ */
+export async function updateHomologationStatus(
+  id: string,
+  status: string,
+  reason?: string
+): Promise<Homologation> {
+  const response = await fetch(`${API_BASE_URL}/api/homologations/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status, reason }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || 'Failed to update status',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+
+  return data as Homologation;
+}
+
 // ============================================================================
 // Photo API
 // ============================================================================

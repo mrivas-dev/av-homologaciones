@@ -5,12 +5,13 @@ import { useParams } from 'next/navigation';
 import { 
   getHomologationById, 
   updateHomologation,
+  updateHomologationStatus,
   getPhotos,
   Homologation, 
   Photo,
   ApiError 
 } from '../../../utils/api';
-import { FiCheck, FiLoader, FiAlertCircle, FiSave } from 'react-icons/fi';
+import { FiCheck, FiLoader, FiAlertCircle, FiSave, FiCreditCard } from 'react-icons/fi';
 import TrailerInfoForm, { TrailerFormData } from '../../../components/homologation/TrailerInfoForm';
 import OwnerInfoForm, { OwnerFormData } from '../../../components/homologation/OwnerInfoForm';
 import PhotoUpload from '../../../components/homologation/PhotoUpload';
@@ -348,13 +349,126 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
 });
 
 // Step 2: Payment Content
-function PaymentStep() {
+function PaymentStep({
+  homologation,
+  onHomologationUpdate,
+}: {
+  homologation: Homologation;
+  onHomologationUpdate: (data: Homologation) => void;
+}) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const PRICE = 1; // ARS $1 for now
+
+  const handlePayment = async () => {
+    if (isProcessing || homologation.status === 'Payed') return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const updated = await updateHomologationStatus(homologation.id, 'Payed');
+      onHomologationUpdate(updated);
+      setSuccess(true);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Error al procesar el pago';
+      setError(message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const isPaid = homologation.status === 'Payed';
+
   return (
     <div className="animate-in">
-      <div className="flex items-center justify-center min-h-[300px]">
-        <div className="text-center">
-          <h3 className="text-2xl font-semibold text-white mb-2">Pago</h3>
-          <p className="text-slate-400">Próximamente</p>
+      <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-8 max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-semibold text-white mb-2 flex items-center justify-center gap-2">
+            <FiCreditCard className="w-6 h-6 text-amber-400" />
+            Pago del Trámite
+          </h3>
+          <p className="text-slate-400">
+            Complete el pago para continuar con el proceso de homologación
+          </p>
+        </div>
+
+        {/* Price Display */}
+        <div className="bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-400 mb-1">Monto a pagar</p>
+              <p className="text-3xl font-bold text-white">
+                ARS ${PRICE.toLocaleString('es-AR')}
+              </p>
+            </div>
+            {isPaid && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <FiCheck className="w-5 h-5 text-emerald-400" />
+                <span className="text-sm font-medium text-emerald-400">Pagado</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2">
+            <FiAlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <p className="text-sm text-red-400">{error}</p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {success && !error && (
+          <div className="mb-6 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
+            <FiCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <p className="text-sm text-emerald-400">
+              Pago procesado correctamente. Su solicitud será revisada próximamente.
+            </p>
+          </div>
+        )}
+
+        {/* MercadoPago Button */}
+        {!isPaid && (
+          <button
+            onClick={handlePayment}
+            disabled={isProcessing}
+            className={`
+              w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg
+              font-semibold text-white transition-all duration-200
+              ${isProcessing
+                ? 'bg-slate-700 cursor-wait'
+                : 'bg-[#009EE3] hover:bg-[#0088C7] shadow-lg shadow-[#009EE3]/20 hover:shadow-[#009EE3]/30'
+              }
+            `}
+          >
+            {isProcessing ? (
+              <>
+                <FiLoader className="w-5 h-5 animate-spin" />
+                <span>Procesando...</span>
+              </>
+            ) : (
+              <>
+                {/* MercadoPago Logo - Simple circle with MP */}
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                    <span className="text-[#009EE3] text-xs font-bold">MP</span>
+                  </div>
+                  <span>Pagar con MercadoPago</span>
+                </div>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Payment Info */}
+        <div className="mt-6 pt-6 border-t border-slate-700">
+          <p className="text-xs text-slate-500 text-center">
+            Al hacer clic en "Pagar con MercadoPago", será redirigido a la plataforma de pago segura de MercadoPago
+          </p>
         </div>
       </div>
     </div>
@@ -487,7 +601,12 @@ export default function HomologationTrackingPage() {
           />
         );
       case 2:
-        return <PaymentStep />;
+        return (
+          <PaymentStep 
+            homologation={homologation}
+            onHomologationUpdate={handleHomologationUpdate}
+          />
+        );
       case 3:
         return <ReviewStep />;
       default:
