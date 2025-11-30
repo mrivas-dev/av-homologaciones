@@ -39,7 +39,7 @@ Tracks vehicle homologation requests.
 |--------|------|-------------|-------------|
 | id | VARCHAR(36) | Primary key, UUID | PRIMARY KEY |
 | trailer_type | ENUM | Type of trailer | 'Trailer', 'Rolling Box', 'Motorhome' |
-| trailer_dimensions | VARCHAR(100) | Vehicle dimensions | |
+| trailer_dimensions | VARCHAR(100) | Vehicle dimensions in format "4M x 2M x 1.5M" (Length x Width x Height) | |
 | trailer_number_of_axles | INT | Number of axles | |
 | trailer_license_plate_number | VARCHAR(20) | License plate | |
 | owner_full_name | VARCHAR(255) | Owner's full name | NOT NULL |

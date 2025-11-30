@@ -43,7 +43,7 @@ The form allows users to:
 | Field | Type | Required | Validation |
 |-------|------|----------|------------|
 | `trailerType` | Enum | Yes | "Trailer", "Rolling Box", "Motorhome" |
-| `trailerDimensions` | String | Yes | Min 1 char |
+| `trailerDimensions` | String | Yes | Format: "4M x 2M x 1.5M" (auto-formatted from separate numeric inputs) |
 | `trailerNumberOfAxles` | Number | Yes | Positive integer |
 | `trailerLicensePlateNumber` | String | Yes | Min 1 char |
 
@@ -148,9 +148,15 @@ interface Photo {
 │  ┌─────────────────────┐  ┌─────────────────────┐          │
 │  │ Tipo de Trailer  ▼  │  │ Patente             │          │
 │  └─────────────────────┘  └─────────────────────┘          │
-│  ┌─────────────────────┐  ┌─────────────────────┐          │
-│  │ Dimensiones         │  │ Número de Ejes      │          │
-│  └─────────────────────┘  └─────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────┐  │
+│  │ Dimensiones (Largo x Ancho x Alto)                  │  │
+│  │  ┌──────┐  ┌──────┐  ┌──────┐                       │  │
+│  │  │ Largo│  │Ancho │  │ Alto │                       │  │
+│  │  └──────┘  └──────┘  └──────┘                       │  │
+│  └─────────────────────────────────────────────────────┘  │
+│  ┌─────────────────────┐                                  │
+│  │ Número de Ejes      │                                  │
+│  └─────────────────────┘                                  │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -204,7 +210,7 @@ interface Photo {
 ```typescript
 const validationRules = {
   trailerType: { required: true },
-  trailerDimensions: { required: true, minLength: 1 },
+  trailerDimensions: { required: true, format: 'numeric values in format "4M x 2M x 1.5M"' },
   trailerNumberOfAxles: { required: true, min: 1, max: 10 },
   trailerLicensePlateNumber: { required: true, pattern: /^[A-Z0-9]+$/ },
   ownerFullName: { required: true, minLength: 2 },

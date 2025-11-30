@@ -64,7 +64,7 @@ Content-Type: application/json
   "ownerPhone": "+56 9 1234 5678",
   "ownerEmail": "juan@example.com",
   "trailerType": "Trailer",
-  "trailerDimensions": "3.5m x 2m x 1.5m",
+  "trailerDimensions": "3.5M x 2M x 1.5M",
   "trailerNumberOfAxles": 2,
   "trailerLicensePlateNumber": "ABC-123"
 }
