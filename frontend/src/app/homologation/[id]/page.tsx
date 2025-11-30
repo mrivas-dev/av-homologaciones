@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { 
   getHomologationById, 
   updateHomologation,
-  updateHomologationStatus,
+  createPayment,
   getPhotos,
   Homologation, 
   Photo,
@@ -360,16 +360,20 @@ function PaymentStep({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const PRICE = 1; // ARS $1 for now
+  const PRICE = 100; // ARS $1 = 100 cents
 
   const handlePayment = async () => {
-    if (isProcessing || homologation.status === 'Payed') return;
+    if (isProcessing || homologation.isPaid) return;
 
     setIsProcessing(true);
     setError(null);
 
     try {
-      const updated = await updateHomologationStatus(homologation.id, 'Payed');
+      // Create a payment record instead of changing status
+      await createPayment(homologation.id, PRICE, 'MercadoPago');
+      
+      // Refresh homologation data to get updated isPaid status
+      const updated = await getHomologationById(homologation.id);
       onHomologationUpdate(updated);
       setSuccess(true);
     } catch (err) {
@@ -380,7 +384,8 @@ function PaymentStep({
     }
   };
 
-  const isPaid = homologation.status === 'Payed';
+  const isPaid = homologation.isPaid === true;
+  const totalPaid = homologation.totalPaid || 0;
 
   return (
     <div className="animate-in">
@@ -401,7 +406,7 @@ function PaymentStep({
             <div>
               <p className="text-sm text-slate-400 mb-1">Monto a pagar</p>
               <p className="text-3xl font-bold text-white">
-                ARS ${PRICE.toLocaleString('es-AR')}
+                ARS ${(PRICE / 100).toLocaleString('es-AR')}
               </p>
             </div>
             {isPaid && (
@@ -411,6 +416,13 @@ function PaymentStep({
               </div>
             )}
           </div>
+          {isPaid && totalPaid > 0 && (
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <p className="text-sm text-slate-400">
+                Total abonado: <span className="text-emerald-400 font-medium">ARS ${(totalPaid / 100).toLocaleString('es-AR')}</span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Error Message */}
@@ -426,7 +438,7 @@ function PaymentStep({
           <div className="mb-6 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
             <FiCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
             <p className="text-sm text-emerald-400">
-              Pago procesado correctamente. Su solicitud será revisada próximamente.
+              Pago registrado correctamente. Su solicitud será revisada próximamente.
             </p>
           </div>
         )}

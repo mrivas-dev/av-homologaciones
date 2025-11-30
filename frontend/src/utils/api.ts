@@ -4,6 +4,16 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 // Types
 // ============================================================================
 
+export interface Payment {
+  id: string;
+  homologationId: string;
+  timestamp: string;
+  amount: number;
+  receiptPath: string | null;
+  paymentGateway: string;
+  createdAt: string;
+}
+
 export interface Homologation {
   id: string;
   ownerNationalId: string;
@@ -18,6 +28,10 @@ export interface Homologation {
   version: number;
   createdAt: string;
   updatedAt: string;
+  // Payment fields
+  isPaid?: boolean;
+  payments?: Payment[];
+  totalPaid?: number;
 }
 
 export interface HomologationUpdate {
@@ -300,4 +314,143 @@ export function getPhotoUrl(photo: Photo): string {
   // We need to serve it from the backend
   const fileName = photo.filePath.split('/').pop();
   return `${API_BASE_URL}/uploads/${fileName}`;
+}
+
+/**
+ * Delete a photo
+ */
+export async function deletePhoto(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/photos/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new ApiError(
+      data.error || 'Failed to delete photo',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+}
+
+// ============================================================================
+// Payment API
+// ============================================================================
+
+export interface PaymentsResponse {
+  data: Payment[];
+  total: number;
+  totalPaid: number;
+}
+
+export interface CreatePaymentRequest {
+  homologationId: string;
+  amount: number;
+  paymentGateway?: string;
+}
+
+/**
+ * Create a payment for a homologation
+ */
+export async function createPayment(
+  homologationId: string,
+  amount: number,
+  paymentGateway?: string
+): Promise<Payment> {
+  const response = await fetch(`${API_BASE_URL}/api/payments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      homologationId,
+      amount,
+      paymentGateway: paymentGateway || 'MercadoPago',
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || 'Failed to create payment',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+
+  return data as Payment;
+}
+
+/**
+ * Get payments for a homologation
+ */
+export async function getPaymentsByHomologation(
+  homologationId: string
+): Promise<PaymentsResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/payments/homologation/${homologationId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || 'Failed to fetch payments',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+
+  return data as PaymentsResponse;
+}
+
+/**
+ * Check payment status for a homologation
+ */
+export async function checkPaymentStatus(
+  homologationId: string
+): Promise<{ isPaid: boolean; totalPaid: number }> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/payments/check/${homologationId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || 'Failed to check payment status',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+
+  return data;
+}
+
+/**
+ * Get receipt download URL for a payment
+ */
+export function getReceiptUrl(paymentId: string): string {
+  return `${API_BASE_URL}/api/payments/${paymentId}/receipt`;
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { FiCamera, FiUpload, FiX, FiLoader, FiAlertCircle, FiImage } from 'react-icons/fi';
-import { Photo, uploadPhoto, getPhotoUrl } from '../../utils/api';
+import { FiCamera, FiUpload, FiX, FiLoader, FiAlertCircle, FiImage, FiTrash2 } from 'react-icons/fi';
+import { Photo, uploadPhoto, getPhotoUrl, deletePhoto } from '../../utils/api';
 
 const MAX_PHOTOS = 6;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -32,6 +32,7 @@ export default function PhotoUpload({
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const remainingSlots = MAX_PHOTOS - photos.length - uploadingFiles.length;
@@ -149,6 +150,29 @@ export default function PhotoUpload({
 
   const handleRemoveUploading = (id: string) => {
     setUploadingFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (disabled || deletingPhotoId) return;
+
+    // Confirm deletion
+    if (!confirm('¿Estás seguro de que deseas eliminar esta foto?')) {
+      return;
+    }
+
+    setDeletingPhotoId(photoId);
+    setError(null);
+
+    try {
+      await deletePhoto(photoId);
+      // Remove photo from list
+      onPhotosChange(photos.filter((p) => p.id !== photoId));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al eliminar la foto';
+      setError(message);
+    } finally {
+      setDeletingPhotoId(null);
+    }
   };
 
   const canUpload = remainingSlots > 0 && !disabled;
@@ -282,8 +306,36 @@ export default function PhotoUpload({
                 <FiImage className="w-12 h-12 text-slate-500" />
               </div>
             )}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-xs text-white truncate px-2">{photo.fileName}</span>
+            
+            {/* Hover overlay with delete button */}
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+              <span className="text-xs text-white truncate px-2 max-w-full">{photo.fileName}</span>
+              <button
+                onClick={() => handleDeletePhoto(photo.id)}
+                disabled={disabled || deletingPhotoId === photo.id}
+                className={`
+                  flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                  transition-all duration-200
+                  ${deletingPhotoId === photo.id
+                    ? 'bg-slate-700 text-slate-400 cursor-wait'
+                    : 'bg-red-500/90 hover:bg-red-600 text-white'
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+                title="Eliminar foto"
+              >
+                {deletingPhotoId === photo.id ? (
+                  <>
+                    <FiLoader className="w-4 h-4 animate-spin" />
+                    <span>Eliminando...</span>
+                  </>
+                ) : (
+                  <>
+                    <FiTrash2 className="w-4 h-4" />
+                    <span>Eliminar</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         ))}
