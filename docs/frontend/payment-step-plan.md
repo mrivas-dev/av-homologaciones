@@ -33,7 +33,12 @@ A dedicated `payments` table stores all payment records:
 ### Features Implemented
 
 1. **Price Display**
-   - Shows ARS $1 (100 cents, configurable constant)
+   - Price varies by trailer type:
+     - Trailer: ARS $1 (100 cents)
+     - Rolling Box: ARS $2 (200 cents)
+     - Motorhome: ARS $3 (300 cents)
+   - Price is calculated based on `homologation.trailerType`
+   - Defaults to Trailer price if trailer type is not set
    - Formatted with locale formatting
    - Displayed in a card with clear typography
    - Shows total paid amount when payment exists
@@ -173,7 +178,11 @@ interface PaymentStepProps {
 
 ### Configuration
 
-- Make price configurable (environment variable or database)
+- Prices are currently hardcoded constants (can be made configurable by admin in future)
+- Price mapping:
+  - Trailer: ARS $1 (100 cents)
+  - Rolling Box: ARS $2 (200 cents)
+  - Motorhome: ARS $3 (300 cents)
 - Support multiple payment methods
 - Payment currency selection
 - Tax calculation

@@ -103,7 +103,12 @@ Step 1 is being enhanced to include an editable form and photo upload. See [Step
 Payment step with MercadoPago integration (initial implementation):
 
 **Features:**
-- Price display: ARS $1 (configurable)
+- Price display: Varies by trailer type
+  - Trailer: ARS $1 (100 cents)
+  - Rolling Box: ARS $2 (200 cents)
+  - Motorhome: ARS $3 (300 cents)
+- Price is automatically calculated based on `homologation.trailerType`
+- Defaults to Trailer price if trailer type is not set
 - MercadoPago payment button with logo
 - Click handler to mark homologation as "Payed"
 - Status indicators (paid/unpaid)
@@ -202,7 +207,7 @@ HomologationTrackingPage
 │       ├── Photo thumbnails   # With delete button on hover
 │       └── Upload zone        # Drag-drop or click to upload
 ├── PaymentStep                # Step 2 content
-│   ├── Price display          # ARS $1 (configurable)
+│   ├── Price display          # Varies by trailer type (Trailer: $1, Rolling Box: $2, Motorhome: $3)
 │   └── MercadoPago button     # Payment button with logo
 └── ReviewStep                 # Step 3 content (placeholder)
 ```

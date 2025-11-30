@@ -342,6 +342,13 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
   );
 });
 
+// Price mapping by trailer type (in cents)
+const TRAILER_TYPE_PRICES: Record<string, number> = {
+  'Trailer': 100,      // ARS $1 = 100 cents
+  'Rolling Box': 200, // ARS $2 = 200 cents
+  'Motorhome': 300,   // ARS $3 = 300 cents
+};
+
 // Step 2: Payment Content
 function PaymentStep({
   homologation,
@@ -354,7 +361,10 @@ function PaymentStep({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const PRICE = 100; // ARS $1 = 100 cents
+  // Calculate price based on trailer type, default to Trailer price if not set
+  const PRICE = homologation.trailerType 
+    ? (TRAILER_TYPE_PRICES[homologation.trailerType] || TRAILER_TYPE_PRICES['Trailer'])
+    : TRAILER_TYPE_PRICES['Trailer'];
 
   const handlePayment = async () => {
     if (isProcessing || homologation.isPaid) return;
