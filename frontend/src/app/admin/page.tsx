@@ -244,7 +244,8 @@ export default function AdminDashboardPage() {
                   {homologations.map((item) => (
                     <tr
                       key={item.id}
-                      className="hover:bg-slate-800/50 transition-colors"
+                      onClick={() => router.push(`/admin/homologation/${item.id}`)}
+                      className="hover:bg-slate-800/50 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4">
                         <span className="font-mono text-sm text-slate-300">
@@ -273,7 +274,11 @@ export default function AdminDashboardPage() {
             {/* Mobile Cards */}
             <div className="md:hidden divide-y divide-slate-800">
               {homologations.map((item) => (
-                <div key={item.id} className="p-4 hover:bg-slate-800/50 transition-colors">
+                <div
+                  key={item.id}
+                  onClick={() => router.push(`/admin/homologation/${item.id}`)}
+                  className="p-4 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                >
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-mono text-sm text-slate-400">
                       #{truncateId(item.id)}

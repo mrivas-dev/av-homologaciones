@@ -1,5 +1,16 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
+export interface Photo {
+  id: string;
+  homologationId: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  isIdDocument: boolean;
+  createdAt: string;
+}
+
 export interface HomologationListItem {
   id: string;
   ownerPhone: string | null;
@@ -8,6 +19,16 @@ export interface HomologationListItem {
   status: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface HomologationDetail extends HomologationListItem {
+  trailerType: string | null;
+  trailerDimensions: string | null;
+  trailerNumberOfAxles: number | null;
+  trailerLicensePlateNumber: string | null;
+  ownerEmail: string | null;
+  photos: Photo[];
+  version: number;
 }
 
 export interface HomologationsResponse {
@@ -146,6 +167,41 @@ export async function completeHomologation(
       method: 'POST',
       headers: getAuthHeaders(token),
       body: JSON.stringify({ reason }),
+    }
+  );
+
+  return handleResponse(response);
+}
+
+/**
+ * Fetch a single homologation with full details including photos
+ */
+export async function fetchHomologationDetails(
+  token: string,
+  id: string
+): Promise<HomologationDetail> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/homologations/${id}`,
+    {
+      headers: getAuthHeaders(token),
+    }
+  );
+
+  return handleResponse<HomologationDetail>(response);
+}
+
+/**
+ * Delete a homologation (soft delete)
+ */
+export async function deleteHomologation(
+  token: string,
+  id: string
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/homologations/${id}`,
+    {
+      method: 'DELETE',
+      headers: getAuthHeaders(token),
     }
   );
 
