@@ -105,6 +105,7 @@ interface Photo {
 ### Phase 3: Photo Upload Component
 
 1. **Create `PhotoUpload` component**
+   - Example photos section (Frontal, Lateral, Chasis)
    - Drag-and-drop zone
    - Click to select files
    - Preview thumbnails
@@ -162,11 +163,18 @@ interface Photo {
 
 ┌─────────────────────────────────────────────────────────────┐
 │  Fotos del Trailer (máximo 6)                               │
+│  Formatos: JPG, PNG, WebP, HEIC, PDF • Max 10MB            │
+│                                                              │
+│  Ejemplos de fotos aceptadas:                               │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                    │
+│  │ Frontal │  │ Lateral │  │ Chasis  │                    │
+│  │ [img]   │  │ [img]   │  │ [img]   │                    │
+│  └─────────┘  └─────────┘  └─────────┘                    │
+│                                                              │
 │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────────────┐│
 │  │  📷     │  │  📷     │  │  📷     │  │  + Agregar      ││
 │  │  img1   │  │  img2   │  │  img3   │  │    Foto         ││
 │  └─────────┘  └─────────┘  └─────────┘  └─────────────────┘│
-│  Formatos: JPG, PNG, WebP, HEIC, PDF • Max 10MB por archivo │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -180,10 +188,11 @@ interface Photo {
 
 ### Photo Upload States
 
-1. **Empty slot** - Dashed border with "+" icon
-2. **Uploading** - Progress bar/spinner
-3. **Uploaded** - Thumbnail with delete button
-4. **Error** - Red border with error message
+1. **Example photos** - Three example thumbnails (Frontal, Lateral, Chasis) with labels
+2. **Empty slot** - Dashed border with "+" icon
+3. **Uploading** - Progress bar/spinner
+4. **Uploaded** - Thumbnail with delete button
+5. **Error** - Red border with error message
 
 ## Validation Rules
 
@@ -293,6 +302,7 @@ export async function deletePhoto(
 - [x] Photos can be uploaded (up to 6)
 - [x] Photos display as thumbnails
 - [x] Upload progress is visible
+- [x] Example photos section showing acceptable photo types
 - [x] Form validates before proceeding to Step 2
 - [x] Changes are saved to the backend
 - [x] Auto-save on step navigation
@@ -329,6 +339,7 @@ export async function deletePhoto(
 ## Related Documentation
 
 - [Homologation Tracking Page](./homologation-tracking-page.md)
+- [Photo Examples Plan](./photo-examples-plan.md) - Implementation details for example photos
 - [API Endpoints](../api/endpoints.md)
 - [Database Schema](../backend/database-schema.md)
 

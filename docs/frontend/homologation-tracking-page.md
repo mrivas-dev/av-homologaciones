@@ -37,7 +37,7 @@ The page follows the [Wizard UI Pattern](https://www.eleken.co/blog-posts/wizard
 | Step | Name | Description | Status |
 |------|------|-------------|--------|
 | 1 | Información General | Trailer info form + Photo upload | ✅ Completed |
-| 2 | Pago | Payment processing | 🔜 Coming soon |
+| 2 | Pago | Payment processing with MercadoPago | 🚧 In Progress |
 | 3 | Revisión | Final review and approval | 🔜 Coming soon |
 
 > 📋 See [Step 1 Form Plan](./step1-form-plan.md) for detailed implementation plan.
@@ -81,6 +81,7 @@ Step 1 is being enhanced to include an editable form and photo upload. See [Step
 - Drag-and-drop or click to upload
 - Thumbnail gallery with delete option
 - Upload progress indicator
+- Example photos section showing acceptable photo types (Frontal, Lateral, Chasis)
 
 **Auto-Save Functionality:**
 - Changes are automatically saved when navigating between steps
@@ -90,7 +91,20 @@ Step 1 is being enhanced to include an editable form and photo upload. See [Step
 - If save fails, navigation is prevented and error is shown
 
 #### Step 2: Pago
-Placeholder for payment functionality (coming soon)
+
+Payment step with MercadoPago integration (initial implementation):
+
+**Features:**
+- Price display: ARS $1 (configurable)
+- MercadoPago payment button with logo
+- Click handler to mark homologation as "Payed"
+- Status indicators (paid/unpaid)
+- Error handling and success messages
+- Processing state during payment
+
+**Current Implementation:**
+- Payment button marks homologation as "Payed" immediately
+- Full MercadoPago integration coming soon
 
 #### Step 3: Revisión
 Placeholder for review functionality (coming soon)
@@ -176,7 +190,9 @@ HomologationTrackingPage
 │   ├── TrailerInfoForm        # Trailer details form
 │   ├── OwnerInfoForm          # Owner details form  
 │   └── PhotoUpload            # Drag-drop upload zone + thumbnail gallery
-├── PaymentStep                # Step 2 content (placeholder)
+├── PaymentStep                # Step 2 content
+│   ├── Price display          # ARS $1 (configurable)
+│   └── MercadoPago button     # Payment button with logo
 └── ReviewStep                 # Step 3 content (placeholder)
 ```
 
@@ -280,6 +296,27 @@ Get all photos for a homologation
 }
 ```
 
+#### PATCH /api/homologations/:id/status
+Update homologation status (used for payment)
+
+**Request Body:**
+```json
+{
+  "status": "Payed",
+  "reason": "Payment processed via MercadoPago"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "homologation-uuid",
+  "status": "Payed",
+  "updatedAt": "2024-01-15T10:30:00Z",
+  ...
+}
+```
+
 ### Component States
 
 1. **Loading:** Shows spinner while fetching data
@@ -339,9 +376,13 @@ Planned features for future phases:
 
 > 📋 See [Step 1 Form Plan](./step1-form-plan.md) for full implementation details.
 
-### Step 2: Pago
-- [ ] Payment gateway integration
-- [ ] Payment status display
+### Step 2: Pago (In Progress)
+- [x] Payment UI with price display
+- [x] MercadoPago button with logo
+- [x] Status update to "Payed" on click
+- [x] Payment status indicators
+- [ ] Full MercadoPago gateway integration
+- [ ] Payment webhook handling
 - [ ] Invoice/receipt generation
 
 ### Step 3: Revisión
@@ -371,6 +412,7 @@ Planned features for future phases:
 ## Related Documentation
 
 - [Step 1 Form Plan](./step1-form-plan.md) - Detailed implementation plan for Step 1
+- [Photo Examples Plan](./photo-examples-plan.md) - Example photos feature
 - [Homologation Overview](../backend/homologation-overview.md)
 - [API Endpoints](../api/endpoints.md)
 - [Landing Page Plan](./landing-page-plan.md)
