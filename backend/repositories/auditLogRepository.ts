@@ -19,8 +19,8 @@ export class AuditLogRepository {
         await client.execute(
             `INSERT INTO audit_logs (
         id, entity_type, entity_id, action, old_values, new_values,
-        created_by, updated_by, created_at, updated_at, is_deleted
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        created_by, created_at, is_deleted
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 id,
                 data.entityType,
@@ -29,8 +29,6 @@ export class AuditLogRepository {
                 data.oldValues ? JSON.stringify(data.oldValues) : null,
                 data.newValues ? JSON.stringify(data.newValues) : null,
                 data.createdBy,
-                data.createdBy,
-                now,
                 now,
                 false,
             ],
@@ -44,9 +42,7 @@ export class AuditLogRepository {
             oldValues: data.oldValues,
             newValues: data.newValues,
             createdBy: data.createdBy,
-            updatedBy: data.createdBy,
             createdAt: now,
-            updatedAt: now,
             isDeleted: false,
             deletedAt: null,
             deletedBy: null,
@@ -75,9 +71,7 @@ export class AuditLogRepository {
             oldValues: row.old_values ? JSON.parse(row.old_values) : undefined,
             newValues: row.new_values ? JSON.parse(row.new_values) : undefined,
             createdBy: row.created_by,
-            updatedBy: row.updated_by,
             createdAt: row.created_at,
-            updatedAt: row.updated_at,
             isDeleted: Boolean(row.is_deleted),
             deletedAt: row.deleted_at,
             deletedBy: row.deleted_by,
