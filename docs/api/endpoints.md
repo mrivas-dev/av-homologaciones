@@ -18,16 +18,20 @@ Authorization: Bearer <token>
 
 ### Login
 
+Authenticate with username or email.
+
 #### Request
 ```
 POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@example.com",
+  "identifier": "admin@example.com",
   "password": "password123"
 }
 ```
+
+**Note:** The `identifier` field accepts either an email address or a username.
 
 #### Response
 **Success (200 OK)**
