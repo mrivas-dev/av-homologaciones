@@ -399,4 +399,85 @@ export class HomologationController {
             ctx.response.body = { error: "Internal server error" };
         }
     }
+
+    /**
+     * POST /api/homologations/lookup
+     * Lookup existing homologation by DNI + phone, or create a new one if not found
+     */
+    async lookupOrCreate(ctx: Context) {
+        try {
+            const body = await ctx.request.body.json();
+
+            // Validate request body
+            const LookupSchema = z.object({
+                dni: z.string().min(1, "DNI is required"),
+                phone: z.string().regex(/^[0-9+() -]+$/, "Invalid phone format"),
+            });
+
+            const validationResult = LookupSchema.safeParse(body);
+            if (!validationResult.success) {
+                ctx.response.status = 400;
+                ctx.response.body = {
+                    error: "Invalid request",
+                    details: validationResult.error.errors,
+                };
+                return;
+            }
+
+            const { dni, phone } = validationResult.data;
+
+            // Try to find existing homologation
+            const existing = await homologationRepository.findByNationalIdAndPhone(
+                dni,
+                phone,
+            );
+
+            if (existing) {
+                ctx.response.status = 200;
+                ctx.response.body = {
+                    found: true,
+                    homologation: existing,
+                };
+                return;
+            }
+
+            // Create new homologation with minimal data
+            const auth = ctx.state.auth as AuthContext | undefined;
+            const userId = auth?.user.id ||
+                "00000000-0000-0000-0000-000000000000";
+
+            const newHomologation = await homologationRepository.create(
+                {
+                    ownerNationalId: dni,
+                    ownerPhone: phone,
+                    status: HomologationStatus.DRAFT,
+                } as CreateHomologationRequest,
+                userId,
+            );
+
+            // Create audit log for new homologation
+            await auditLogRepository.create({
+                entityType: "Homologation",
+                entityId: newHomologation.id,
+                action: "CREATED_VIA_LOOKUP",
+                oldValues: undefined,
+                newValues: {
+                    ownerNationalId: dni,
+                    ownerPhone: phone,
+                    status: newHomologation.status,
+                },
+                createdBy: userId,
+            });
+
+            ctx.response.status = 201;
+            ctx.response.body = {
+                found: false,
+                homologation: newHomologation,
+            };
+        } catch (error) {
+            console.error("Lookup or create homologation error:", error);
+            ctx.response.status = 500;
+            ctx.response.body = { error: "Internal server error" };
+        }
+    }
 }

@@ -193,6 +193,26 @@ export class HomologationRepository {
         return result.affectedRows !== undefined && result.affectedRows > 0;
     }
 
+    async findByNationalIdAndPhone(
+        nationalId: string,
+        phone: string,
+    ): Promise<Homologation | null> {
+        const client = await getClient();
+        const result = await client.query(
+            `SELECT * FROM homologations 
+             WHERE owner_national_id = ? AND owner_phone = ? AND is_deleted = false
+             ORDER BY created_at DESC
+             LIMIT 1`,
+            [nationalId, phone],
+        );
+
+        if (result.length === 0) {
+            return null;
+        }
+
+        return this.mapRowToHomologation(result[0]);
+    }
+
     private mapRowToHomologation(row: any): Homologation {
         return {
             id: row.id,

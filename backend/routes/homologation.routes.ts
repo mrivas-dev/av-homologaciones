@@ -10,6 +10,14 @@ const router = new Router();
 const homologationController = new HomologationController();
 
 // Public routes (with optional auth to track user if logged in)
+
+// Lookup or create homologation by DNI + phone (must be before :id routes)
+router.post(
+    "/api/homologations/lookup",
+    optionalAuth,
+    (ctx) => homologationController.lookupOrCreate(ctx),
+);
+
 router.post(
     "/api/homologations",
     optionalAuth,
