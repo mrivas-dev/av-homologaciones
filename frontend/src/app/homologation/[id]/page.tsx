@@ -1,9 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useParams } from 'next/navigation';
-import { getHomologationById, Homologation, ApiError } from '../../../utils/api';
-import { FiCheck, FiLoader, FiAlertCircle } from 'react-icons/fi';
+import { 
+  getHomologationById, 
+  updateHomologation,
+  getPhotos,
+  Homologation, 
+  Photo,
+  ApiError 
+} from '../../../utils/api';
+import { FiCheck, FiLoader, FiAlertCircle, FiSave } from 'react-icons/fi';
+import TrailerInfoForm, { TrailerFormData } from '../../../components/homologation/TrailerInfoForm';
+import OwnerInfoForm, { OwnerFormData } from '../../../components/homologation/OwnerInfoForm';
+import PhotoUpload from '../../../components/homologation/PhotoUpload';
 
 // Step configuration
 interface Step {
@@ -21,10 +31,12 @@ const steps: Step[] = [
 // Stepper Component
 function WizardStepper({ 
   currentStep, 
-  onStepClick 
+  onStepClick,
+  disabled,
 }: { 
   currentStep: number; 
   onStepClick: (step: number) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="w-full">
@@ -34,8 +46,9 @@ function WizardStepper({
           <div key={step.id} className="flex items-center">
             {/* Step Circle & Content */}
             <button
-              onClick={() => onStepClick(step.id)}
-              className="flex flex-col items-center group cursor-pointer focus:outline-none"
+              onClick={() => !disabled && onStepClick(step.id)}
+              disabled={disabled}
+              className={`flex flex-col items-center group focus:outline-none ${disabled ? 'cursor-wait' : 'cursor-pointer'}`}
             >
               {/* Step Circle */}
               <div
@@ -99,7 +112,8 @@ function WizardStepper({
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center flex-1">
               <button
-                onClick={() => onStepClick(step.id)}
+                onClick={() => !disabled && onStepClick(step.id)}
+                disabled={disabled}
                 className={`
                   flex items-center justify-center w-10 h-10 rounded-full 
                   border-2 transition-all duration-300
@@ -147,103 +161,191 @@ function WizardStepper({
   );
 }
 
+// Validation types
+interface FormErrors {
+  trailer: Partial<Record<keyof TrailerFormData, string>>;
+  owner: Partial<Record<keyof OwnerFormData, string>>;
+}
+
+// Ref handle for GeneralInfoStep
+export interface GeneralInfoStepHandle {
+  saveChanges: () => Promise<boolean>;
+  hasUnsavedChanges: () => boolean;
+}
+
 // Step 1: General Information Content
-function GeneralInfoStep({ homologation }: { homologation: Homologation }) {
+const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
+  homologation: Homologation;
+  photos: Photo[];
+  onHomologationUpdate: (data: Homologation) => void;
+  onPhotosChange: (photos: Photo[]) => void;
+  onSavingChange: (isSaving: boolean) => void;
+}>(function GeneralInfoStep({ 
+  homologation,
+  photos,
+  onHomologationUpdate,
+  onPhotosChange,
+  onSavingChange,
+}, ref) {
+  const [trailerData, setTrailerData] = useState<TrailerFormData>({
+    trailerType: homologation.trailerType || '',
+    trailerDimensions: homologation.trailerDimensions || '',
+    trailerNumberOfAxles: homologation.trailerNumberOfAxles || '',
+    trailerLicensePlateNumber: homologation.trailerLicensePlateNumber || '',
+  });
+
+  const [ownerData, setOwnerData] = useState<OwnerFormData>({
+    ownerFullName: homologation.ownerFullName || '',
+    ownerEmail: homologation.ownerEmail || '',
+    ownerNationalId: homologation.ownerNationalId,
+    ownerPhone: homologation.ownerPhone,
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({ trailer: {}, owner: {} });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Track changes
+  useEffect(() => {
+    const trailerChanged = 
+      trailerData.trailerType !== (homologation.trailerType || '') ||
+      trailerData.trailerDimensions !== (homologation.trailerDimensions || '') ||
+      trailerData.trailerNumberOfAxles !== (homologation.trailerNumberOfAxles || '') ||
+      trailerData.trailerLicensePlateNumber !== (homologation.trailerLicensePlateNumber || '');
+    
+    const ownerChanged = 
+      ownerData.ownerFullName !== (homologation.ownerFullName || '') ||
+      ownerData.ownerEmail !== (homologation.ownerEmail || '');
+
+    setHasChanges(trailerChanged || ownerChanged);
+  }, [trailerData, ownerData, homologation]);
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = { trailer: {}, owner: {} };
+
+    // Only validate email format if provided (other fields are optional for auto-save)
+    if (ownerData.ownerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerData.ownerEmail)) {
+      newErrors.owner.ownerEmail = 'Ingresa un email válido';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors.trailer).length === 0 && Object.keys(newErrors.owner).length === 0;
+  };
+
+  const saveChanges = async (): Promise<boolean> => {
+    if (!hasChanges) return true; // Nothing to save
+    if (!validateForm()) return false;
+
+    setIsSaving(true);
+    onSavingChange(true);
+    setSaveMessage(null);
+
+    try {
+      const updated = await updateHomologation(homologation.id, {
+        trailerType: trailerData.trailerType || undefined,
+        trailerDimensions: trailerData.trailerDimensions || undefined,
+        trailerNumberOfAxles: trailerData.trailerNumberOfAxles || undefined,
+        trailerLicensePlateNumber: trailerData.trailerLicensePlateNumber || undefined,
+        ownerFullName: ownerData.ownerFullName || undefined,
+        ownerEmail: ownerData.ownerEmail || undefined,
+      });
+      
+      onHomologationUpdate(updated);
+      setHasChanges(false);
+      setSaveMessage({ type: 'success', text: 'Cambios guardados automáticamente' });
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveMessage(null), 3000);
+      return true;
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Error al guardar los cambios';
+      setSaveMessage({ type: 'error', text: message });
+      return false;
+    } finally {
+      setIsSaving(false);
+      onSavingChange(false);
+    }
+  };
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    saveChanges,
+    hasUnsavedChanges: () => hasChanges,
+  }));
+
+  const handleManualSave = async () => {
+    await saveChanges();
+  };
+
   return (
-    <div className="animate-in">
-      <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-6">
-          Información de la Homologación
-        </h3>
-        
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* ID */}
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">ID</p>
-              <p className="text-sm font-mono text-slate-300">{homologation.id}</p>
+    <div className="space-y-6 animate-in">
+      {/* Save button and status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {saveMessage && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
+              saveMessage.type === 'success' 
+                ? 'bg-emerald-500/10 text-emerald-400' 
+                : 'bg-red-500/10 text-red-400'
+            }`}>
+              {saveMessage.type === 'success' ? (
+                <FiCheck className="w-4 h-4" />
+              ) : (
+                <FiAlertCircle className="w-4 h-4" />
+              )}
+              {saveMessage.text}
             </div>
-            
-            {/* Status */}
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Estado</p>
-              <p className="text-sm text-slate-300">{homologation.status}</p>
-            </div>
-            
-            {/* Phone */}
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Teléfono</p>
-              <p className="text-sm text-slate-300">{homologation.ownerPhone || '-'}</p>
-            </div>
-            
-            {/* DNI */}
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">DNI/CUIT</p>
-              <p className="text-sm text-slate-300">{homologation.ownerNationalId || '-'}</p>
-            </div>
-            
-            {/* Full Name */}
-            {homologation.ownerFullName && (
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Nombre Completo</p>
-                <p className="text-sm text-slate-300">{homologation.ownerFullName}</p>
-              </div>
-            )}
-            
-            {/* Email */}
-            {homologation.ownerEmail && (
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Email</p>
-                <p className="text-sm text-slate-300">{homologation.ownerEmail}</p>
-              </div>
-            )}
-            
-            {/* Trailer Type */}
-            {homologation.trailerType && (
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Tipo de Trailer</p>
-                <p className="text-sm text-slate-300">{homologation.trailerType}</p>
-              </div>
-            )}
-            
-            {/* Trailer Dimensions */}
-            {homologation.trailerDimensions && (
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Dimensiones</p>
-                <p className="text-sm text-slate-300">{homologation.trailerDimensions}</p>
-              </div>
-            )}
-            
-            {/* Number of Axles */}
-            {homologation.trailerNumberOfAxles && (
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Número de Ejes</p>
-                <p className="text-sm text-slate-300">{homologation.trailerNumberOfAxles}</p>
-              </div>
-            )}
-            
-            {/* License Plate */}
-            {homologation.trailerLicensePlateNumber && (
-              <div className="bg-slate-800/50 rounded-lg p-4">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Patente</p>
-                <p className="text-sm text-slate-300">{homologation.trailerLicensePlateNumber}</p>
-              </div>
-            )}
-          </div>
-          
-          {/* Timestamps */}
-          <div className="pt-4 border-t border-slate-700/50">
-            <div className="flex flex-wrap gap-4 text-xs text-slate-500">
-              <span>Creado: {new Date(homologation.createdAt).toLocaleDateString('es-AR')}</span>
-              <span>Actualizado: {new Date(homologation.updatedAt).toLocaleDateString('es-AR')}</span>
-              <span>Versión: {homologation.version}</span>
-            </div>
-          </div>
+          )}
         </div>
+        
+        <button
+          onClick={handleManualSave}
+          disabled={isSaving || !hasChanges}
+          className={`
+            flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
+            transition-all duration-200
+            ${hasChanges
+              ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20'
+              : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+            }
+          `}
+        >
+          {isSaving ? (
+            <FiLoader className="w-4 h-4 animate-spin" />
+          ) : (
+            <FiSave className="w-4 h-4" />
+          )}
+          {isSaving ? 'Guardando...' : 'Guardar cambios'}
+        </button>
       </div>
+
+      {/* Trailer Info Form */}
+      <TrailerInfoForm
+        initialData={trailerData}
+        onChange={setTrailerData}
+        errors={errors.trailer}
+        disabled={isSaving}
+      />
+
+      {/* Owner Info Form */}
+      <OwnerInfoForm
+        initialData={ownerData}
+        onChange={setOwnerData}
+        errors={errors.owner}
+        disabled={isSaving}
+      />
+
+      {/* Photo Upload */}
+      <PhotoUpload
+        homologationId={homologation.id}
+        photos={photos}
+        onPhotosChange={onPhotosChange}
+        disabled={isSaving}
+      />
     </div>
   );
-}
+});
 
 // Step 2: Payment Content
 function PaymentStep() {
@@ -279,19 +381,30 @@ export default function HomologationTrackingPage() {
   const id = params.id as string;
 
   const [homologation, setHomologation] = useState<Homologation | null>(null);
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
 
-  useEffect(() => {
-    async function fetchHomologation() {
+  // Ref to access GeneralInfoStep methods
+  const generalInfoRef = useRef<GeneralInfoStepHandle>(null);
+
+  const fetchData = useCallback(async () => {
       if (!id) return;
 
       try {
         setLoading(true);
         setError(null);
-        const data = await getHomologationById(id);
-        setHomologation(data);
+      
+      // Fetch homologation and photos in parallel
+      const [homologationData, photosData] = await Promise.all([
+        getHomologationById(id),
+        getPhotos(id),
+      ]);
+      
+      setHomologation(homologationData);
+      setPhotos(photosData.data);
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);
@@ -300,26 +413,61 @@ export default function HomologationTrackingPage() {
         }
       } finally {
         setLoading(false);
-      }
     }
-
-    fetchHomologation();
   }, [id]);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Auto-save before step change
+  const autoSaveAndNavigate = async (targetStep: number) => {
+    if (currentStep === targetStep) return;
+    
+    // Only auto-save if we're on step 1 (the form step)
+    if (currentStep === 1 && generalInfoRef.current) {
+      const hasChanges = generalInfoRef.current.hasUnsavedChanges();
+      if (hasChanges) {
+        setIsAutoSaving(true);
+        const success = await generalInfoRef.current.saveChanges();
+        setIsAutoSaving(false);
+        
+        if (!success) {
+          // If save failed, don't navigate
+          return;
+        }
+      }
+    }
+    
+    setCurrentStep(targetStep);
+  };
+
   const handleStepClick = (step: number) => {
-    setCurrentStep(step);
+    autoSaveAndNavigate(step);
   };
 
   const handleNext = () => {
     if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+      autoSaveAndNavigate(currentStep + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      autoSaveAndNavigate(currentStep - 1);
     }
+  };
+
+  const handleHomologationUpdate = (updated: Homologation) => {
+    setHomologation(updated);
+  };
+
+  const handlePhotosChange = (newPhotos: Photo[]) => {
+    setPhotos(newPhotos);
+  };
+
+  const handleSavingChange = (saving: boolean) => {
+    setIsAutoSaving(saving);
   };
 
   // Render step content based on current step
@@ -328,7 +476,16 @@ export default function HomologationTrackingPage() {
 
     switch (currentStep) {
       case 1:
-        return <GeneralInfoStep homologation={homologation} />;
+        return (
+          <GeneralInfoStep 
+            ref={generalInfoRef}
+            homologation={homologation} 
+            photos={photos}
+            onHomologationUpdate={handleHomologationUpdate}
+            onPhotosChange={handlePhotosChange}
+            onSavingChange={handleSavingChange}
+          />
+        );
       case 2:
         return <PaymentStep />;
       case 3:
@@ -396,11 +553,25 @@ export default function HomologationTrackingPage() {
         </div>
       </header>
 
+      {/* Auto-save indicator */}
+      {isAutoSaving && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50">
+          <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
+            <FiLoader className="w-4 h-4 text-amber-400 animate-spin" />
+            <span className="text-sm text-slate-300">Guardando cambios...</span>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Wizard Stepper */}
         <div className="mb-10">
-          <WizardStepper currentStep={currentStep} onStepClick={handleStepClick} />
+          <WizardStepper 
+            currentStep={currentStep} 
+            onStepClick={handleStepClick}
+            disabled={isAutoSaving}
+          />
         </div>
 
         {/* Step Content */}
@@ -412,10 +583,10 @@ export default function HomologationTrackingPage() {
         <div className="flex items-center justify-between pt-6 border-t border-slate-800">
           <button
             onClick={handleBack}
-            disabled={currentStep === 1}
+            disabled={currentStep === 1 || isAutoSaving}
             className={`
               px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
-              ${currentStep === 1
+              ${currentStep === 1 || isAutoSaving
                 ? 'text-slate-600 cursor-not-allowed'
                 : 'text-slate-300 bg-slate-800 hover:bg-slate-700'
               }
@@ -430,18 +601,27 @@ export default function HomologationTrackingPage() {
 
           <button
             onClick={handleNext}
-            disabled={currentStep === steps.length}
+            disabled={currentStep === steps.length || isAutoSaving}
             className={`
               px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
-              ${currentStep === steps.length
+              ${currentStep === steps.length || isAutoSaving
                 ? 'text-slate-600 cursor-not-allowed'
                 : 'text-white bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-500/20'
               }
             `}
           >
-            {currentStep === steps.length ? 'Finalizar' : 'Siguiente'}
+            {isAutoSaving ? (
+              <span className="flex items-center gap-2">
+                <FiLoader className="w-4 h-4 animate-spin" />
+                Guardando...
+              </span>
+            ) : currentStep === steps.length ? (
+              'Finalizar'
+            ) : (
+              'Siguiente'
+            )}
           </button>
-        </div>
+      </div>
       </main>
     </div>
   );
