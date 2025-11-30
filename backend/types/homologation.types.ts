@@ -68,8 +68,8 @@ export const HomologationSchema = BaseSchema.extend({
 
 export type Homologation = z.infer<typeof HomologationSchema>;
 
-// Audit Log Schema
-export const AuditLogSchema = BaseSchema.extend({
+// Audit Log Schema (uses PhotoBaseSchema since audit logs are immutable - no updatedAt/updatedBy)
+export const AuditLogSchema = PhotoBaseSchema.extend({
   entityType: z.string().min(1),
   entityId: z.string().uuid(),
   action: z.string().min(1),
