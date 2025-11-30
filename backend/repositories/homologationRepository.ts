@@ -32,10 +32,10 @@ export class HomologationRepository {
                 data.trailerDimensions || null,
                 data.trailerNumberOfAxles || null,
                 data.trailerLicensePlateNumber || null,
-                data.ownerFullName,
+                data.ownerFullName || null,
                 data.ownerNationalId,
                 data.ownerPhone,
-                data.ownerEmail,
+                data.ownerEmail || null,
                 data.status || HomologationStatus.DRAFT,
                 1, // version
                 false, // is_deleted
