@@ -306,7 +306,11 @@ GET /uploads/:fileName
 }
 ```
 
-**Note:** The `fileName` parameter should be the filename only (e.g., `uuid_timestamp.jpg`), not the full path. Directory traversal attempts are blocked for security.
+**Note:** 
+- The `fileName` parameter should be the filename only (e.g., `uuid_timestamp.jpg`), not the full path. 
+- Directory traversal attempts are blocked for security.
+- When photos are returned in API responses, the `filePath` field contains the full path (e.g., `./uploads/uuid_timestamp.jpg`). 
+- Frontend should extract just the filename and construct the URL as: `${API_BASE_URL}/uploads/${fileName}`
 
 ### Delete Photo
 
@@ -499,6 +503,99 @@ All admin endpoints require authentication with admin role.
 GET /api/admin/homologations
 GET /api/admin/homologations?status=Pending Review
 Authorization: Bearer <admin-token>
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "ownerPhone": "+54 11 1234-5678",
+      "ownerNationalId": "12345678",
+      "ownerFullName": "John Doe",
+      "status": "Pending Review",
+      "createdAt": "2024-11-30T10:00:00.000Z",
+      "updatedAt": "2024-11-30T10:00:00.000Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+### Get Homologation Details (Admin View)
+
+Get a single homologation with full details including photos.
+
+#### Request
+```
+GET /api/admin/homologations/:id
+Authorization: Bearer <admin-token>
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "id": "uuid",
+  "ownerPhone": "+54 11 1234-5678",
+  "ownerNationalId": "12345678",
+  "ownerFullName": "John Doe",
+  "ownerEmail": "john@example.com",
+  "trailerType": "Trailer",
+  "trailerDimensions": "4M x 2M x 1.5M",
+  "trailerNumberOfAxles": 2,
+  "trailerLicensePlateNumber": "ABC123",
+  "status": "Pending Review",
+  "version": 1,
+  "createdAt": "2024-11-30T10:00:00.000Z",
+  "updatedAt": "2024-11-30T10:00:00.000Z",
+  "photos": [
+    {
+      "id": "uuid",
+      "homologationId": "uuid",
+      "fileName": "photo.jpg",
+      "filePath": "/uploads/uuid_timestamp.jpg",
+      "fileSize": 1024000,
+      "mimeType": "image/jpeg",
+      "isIdDocument": false,
+      "createdAt": "2024-11-30T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "Homologation not found"
+}
+```
+
+### Delete Homologation (Admin Only)
+
+Soft delete a homologation. The homologation is marked as deleted but not removed from the database.
+
+#### Request
+```
+DELETE /api/admin/homologations/:id
+Authorization: Bearer <admin-token>
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "message": "Homologation deleted successfully"
+}
+```
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "Homologation not found"
+}
 ```
 
 ### Approve Homologation

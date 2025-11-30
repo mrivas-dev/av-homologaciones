@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Admin Panel provides administrative functionality for managing homologation requests. It includes authentication, a dashboard with a homologations list, and will support additional admin features in the future.
+The Admin Panel provides comprehensive administrative functionality for managing homologation requests. It includes authentication, a dashboard with a homologations list, detailed homologation views with photos, status management, and deletion capabilities.
 
 ## Architecture
 
@@ -18,14 +18,17 @@ The Admin Panel provides administrative functionality for managing homologation 
 frontend/src/
 ├── app/
 │   └── admin/
-│       ├── layout.tsx         # Admin layout with AuthProvider
+│       ├── layout.tsx                    # Admin layout with AuthProvider
 │       ├── login/
-│       │   └── page.tsx       # Login page
-│       └── page.tsx           # Dashboard page
+│       │   └── page.tsx                  # Login page
+│       ├── page.tsx                      # Dashboard page (list view)
+│       └── homologation/
+│           └── [id]/
+│               └── page.tsx              # Detail page for single homologation
 ├── context/
-│   └── AuthContext.tsx        # Authentication context and provider
+│   └── AuthContext.tsx                   # Authentication context and provider
 └── utils/
-    └── adminApi.ts            # Admin API utilities
+    └── adminApi.ts                       # Admin API utilities
 ```
 
 ## Authentication
@@ -114,6 +117,7 @@ useEffect(() => {
 - Mobile-responsive card layout
 - Refresh functionality
 - Loading and empty states
+- **Clickable rows** - Navigate to detail page on click
 
 **Displayed Columns:**
 | Column | Description |
@@ -133,6 +137,65 @@ useEffect(() => {
 | Approved (Aprobado) | Emerald/Green |
 | Rejected (Rechazado) | Red |
 | Completed (Completado) | Purple |
+
+### Homologation Detail Page (`/admin/homologation/[id]`)
+
+**Features:**
+- **Full homologation details** - Complete information display
+- **Owner information card** - Name, DNI/CUIT, phone, email
+- **Trailer information card** - Type, dimensions, axles, license plate
+- **Photos card** - Always visible card with photo grid (empty state when no photos)
+  - Shows photo count in header: "Fotos (X)" or just "Fotos" if empty
+  - Grid layout with clickable thumbnails (2-4 columns responsive)
+  - Click thumbnail to open full-size lightbox modal
+  - DNI badge indicator for ID documents (amber badge)
+  - Empty state with icon and message when no photos
+  - Error handling for failed image loads (shows placeholder with filename)
+- **Status badge** - Prominent current status display
+- **Status actions** - Context-aware action buttons based on current status
+- **Delete functionality** - Soft delete with confirmation modal
+- **Metadata display** - Created date, updated date, version number
+- **Back navigation** - Return to list view
+
+**Status Actions Available:**
+
+Actions are dynamically shown based on the current status and valid status transitions:
+
+| Current Status | Available Actions |
+|----------------|-------------------|
+| Pending Review | Mark Incomplete, Reject |
+| Payed | Approve, Mark Incomplete, Reject |
+| Incomplete | Reject |
+| Approved | Complete |
+| Rejected | None (terminal state) |
+| Completed | None (terminal state) |
+| Draft | None (user action) |
+
+**Status Change Flow:**
+1. Click action button (Approve, Reject, etc.)
+2. Confirmation modal appears with optional reason field
+3. Enter reason (optional) and confirm
+4. Status updates and page refreshes automatically
+5. Success/error feedback provided
+
+**Photo Viewing:**
+- **Photos card always visible** - Displayed even when no photos are attached
+- Thumbnail grid with hover effects (2-4 columns responsive)
+- Click thumbnail to open full-size lightbox modal
+- Lightbox modal with close button (X icon in top-right)
+- DNI badge overlay for ID documents (amber badge in top-right corner)
+- **Empty state** - Shows icon and "No hay fotos adjuntas" message when no photos exist
+- **Error handling** - Shows placeholder with filename if image fails to load
+- **Photo count** - Displays number of photos in card header, e.g., "Fotos (3)"
+- Photo URLs constructed from backend file paths: `/uploads/[filename]`
+- Responsive image display with proper aspect ratios
+
+**Delete Flow:**
+1. Click "Delete" button in header
+2. Confirmation modal with warning message
+3. Confirm deletion
+4. Homologation is soft-deleted
+5. Redirect to dashboard list view
 
 ## API Utilities (`adminApi.ts`)
 
@@ -157,6 +220,83 @@ Marks a homologation as incomplete.
 
 #### `completeHomologation(token, id, reason?)`
 Marks a homologation as completed.
+
+#### `fetchHomologationDetails(token, id)`
+Fetches a single homologation with full details including photos.
+
+```typescript
+const homologation = await fetchHomologationDetails(token, id);
+// Returns: HomologationDetail with photos array
+```
+
+#### `deleteHomologation(token, id)`
+Soft deletes a homologation.
+
+```typescript
+await deleteHomologation(token, id);
+// Returns: void
+```
+
+### Types
+
+#### `HomologationListItem`
+```typescript
+interface HomologationListItem {
+  id: string;
+  ownerPhone: string | null;
+  ownerNationalId: string | null;
+  ownerFullName: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+#### `HomologationDetail`
+```typescript
+interface HomologationDetail extends HomologationListItem {
+  trailerType: string | null;
+  trailerDimensions: string | null;
+  trailerNumberOfAxles: number | null;
+  trailerLicensePlateNumber: string | null;
+  ownerEmail: string | null;
+  photos: Photo[];
+  version: number;
+}
+
+interface Photo {
+  id: string;
+  homologationId: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  isIdDocument: boolean;
+  createdAt: string;
+}
+```
+
+### Photo URL Construction
+
+Photos are served from the backend at `/uploads/:fileName`. The admin panel constructs photo URLs by:
+
+1. Extracting the filename from the `filePath` stored in the database (e.g., `./uploads/uuid_timestamp.jpg` → `uuid_timestamp.jpg`)
+2. Constructing the URL: `${API_BASE_URL}/uploads/${fileName}`
+3. Handling errors gracefully if images fail to load
+
+**Example:**
+```typescript
+function getPhotoUrl(filePath: string): string {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  const fileName = filePath.split('/').pop() || filePath.split('\\').pop() || filePath;
+  return `${API_BASE_URL}/uploads/${fileName}`;
+}
+```
+
+**Error Handling:**
+- Failed images show a placeholder with the filename
+- Image errors are tracked in component state
+- Broken images are disabled from opening in lightbox
 
 ### Error Handling
 
@@ -210,12 +350,16 @@ Custom components follow the existing Tailwind patterns from the main site but w
 
 Planned features for the admin panel:
 
-1. **Homologation Details View** - View full details of each homologation
-2. **Status Actions** - Approve, reject, mark incomplete from dashboard
-3. **Filtering & Sorting** - Filter by status, date, search
-4. **User Management** - Create/manage admin users
-5. **Audit Log View** - View system audit trail
-6. **Statistics Dashboard** - Charts and metrics
+1. ✅ **Homologation Details View** - View full details of each homologation (Implemented)
+2. ✅ **Status Actions** - Approve, reject, mark incomplete from detail page (Implemented)
+3. ✅ **Photo Viewing** - View all photos with lightbox (Implemented)
+4. ✅ **Delete Functionality** - Soft delete homologations (Implemented)
+5. **Filtering & Sorting** - Filter by status, date, search in list view
+6. **User Management** - Create/manage admin users
+7. **Audit Log View** - View system audit trail
+8. **Statistics Dashboard** - Charts and metrics
+9. **Bulk Actions** - Select multiple homologations for batch operations
+10. **Export Functionality** - Export homologations to CSV/PDF
 
 ## Development
 
