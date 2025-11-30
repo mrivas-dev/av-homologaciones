@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FaCar, FaCheckCircle, FaArrowRight, FaSpinner } from 'react-icons/fa';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -13,30 +14,27 @@ const VideoBackground = dynamic(
 );
 
 export default function HeroSection() {
+  const router = useRouter();
   const [dni, setDni] = useState('');
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<LookupOrCreateResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setResult(null);
 
     try {
       const data = await lookupOrCreateHomologation(dni, phone);
-      setResult(data);
-      // TODO: In the future, redirect to continue the homologation
-      // router.push(`/homologation/${data.homologation.id}`);
+      // Redirect to the homologation tracking page
+      router.push(`/homologation/${data.homologation.id}`);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
         setError('Hubo un error al procesar tu solicitud. Por favor, intentá de nuevo.');
       }
-    } finally {
       setIsLoading(false);
     }
   };
@@ -101,112 +99,79 @@ export default function HeroSection() {
           
           {/* Right column - Form */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-xl border border-white/10">
-            {result ? (
-              // Success state
-              <div className="text-center py-4">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FaCheckCircle className="w-8 h-8 text-green-400" />
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold mb-2">¿Querés saber si tu auto se puede homologar?</h3>
+              <p className="text-gray-200">Dejanos tus datos y te contactamos a la brevedad</p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="dni" className="block text-sm font-medium text-gray-200 mb-1">
+                  DNI
+                </label>
+                <input
+                  type="text"
+                  id="dni"
+                  name="dni"
+                  required
+                  value={dni}
+                  onChange={(e) => setDni(e.target.value)}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:ring-2 focus:ring-secondary focus:border-transparent text-white placeholder-gray-300 disabled:opacity-50"
+                  placeholder="Número de DNI"
+                  inputMode="numeric"
+                  pattern="\d*"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-200 mb-1">
+                  Teléfono
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:ring-2 focus:ring-secondary focus:border-transparent text-white placeholder-gray-300 disabled:opacity-50"
+                  placeholder="Ingresá tu teléfono"
+                />
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm">
+                  {error}
                 </div>
-                <h3 className="text-2xl font-bold mb-2">
-                  {result.found ? '¡Ya tenés una solicitud!' : '¡Solicitud creada!'}
-                </h3>
-                <p className="text-gray-200 mb-4">
-                  {result.found
-                    ? 'Encontramos tu homologación existente. Pronto te contactaremos.'
-                    : 'Tu solicitud fue registrada exitosamente. Pronto te contactaremos.'}
-                </p>
-                <p className="text-sm text-gray-300 mb-6">
-                  ID de solicitud: <span className="font-mono text-white">{result.homologation.id.slice(0, 8)}...</span>
-                </p>
+              )}
+              
+              <div>
                 <button
-                  onClick={() => {
-                    setResult(null);
-                    setDni('');
-                    setPhone('');
-                  }}
-                  className="text-secondary-light hover:text-white transition-colors text-sm underline"
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-primary bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Enviar otra solicitud
+                  {isLoading ? (
+                    <>
+                      <FaSpinner className="animate-spin mr-2" />
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      Enviar solicitud
+                      <FaArrowRight className="ml-2" />
+                    </>
+                  )}
                 </button>
               </div>
-            ) : (
-              // Form state
-              <>
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2">¿Querés saber si tu auto se puede homologar?</h3>
-                  <p className="text-gray-200">Dejanos tus datos y te contactamos a la brevedad</p>
-                </div>
-                
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="dni" className="block text-sm font-medium text-gray-200 mb-1">
-                      DNI
-                    </label>
-                    <input
-                      type="text"
-                      id="dni"
-                      name="dni"
-                      required
-                      value={dni}
-                      onChange={(e) => setDni(e.target.value)}
-                      disabled={isLoading}
-                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:ring-2 focus:ring-secondary focus:border-transparent text-white placeholder-gray-300 disabled:opacity-50"
-                      placeholder="Número de DNI"
-                      inputMode="numeric"
-                      pattern="\d*"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-200 mb-1">
-                      Teléfono
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      disabled={isLoading}
-                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:ring-2 focus:ring-secondary focus:border-transparent text-white placeholder-gray-300 disabled:opacity-50"
-                      placeholder="Ingresá tu teléfono"
-                    />
-                  </div>
-
-                  {error && (
-                    <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm">
-                      {error}
-                    </div>
-                  )}
-                  
-                  <div>
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-primary bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isLoading ? (
-                        <>
-                          <FaSpinner className="animate-spin mr-2" />
-                          Procesando...
-                        </>
-                      ) : (
-                        <>
-                          Enviar solicitud
-                          <FaArrowRight className="ml-2" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  
-                  <p className="text-xs text-gray-300 text-center mt-4">
-                    Al enviar este formulario, aceptas nuestra{' '}
-                    <a href="#" className="text-white font-medium hover:underline">Política de Privacidad</a>.
-                  </p>
-                </form>
-              </>
-            )}
+              
+              <p className="text-xs text-gray-300 text-center mt-4">
+                Al enviar este formulario, aceptas nuestra{' '}
+                <a href="#" className="text-white font-medium hover:underline">Política de Privacidad</a>.
+              </p>
+            </form>
           </div>
         </div>
       </div>

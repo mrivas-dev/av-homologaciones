@@ -62,3 +62,28 @@ export async function lookupOrCreateHomologation(
   return data as LookupOrCreateResponse;
 }
 
+/**
+ * Get homologation by ID
+ */
+export async function getHomologationById(id: string): Promise<Homologation> {
+  const response = await fetch(`${API_BASE_URL}/api/homologations/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || 'Homologation not found',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+
+  return data as Homologation;
+}
+
