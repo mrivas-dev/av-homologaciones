@@ -1,12 +1,14 @@
 import type { Context } from "../deps.ts";
 import { HomologationRepository } from "../repositories/homologationRepository.ts";
 import { HomologationService } from "../services/homologationService.ts";
+import { PhotoRepository } from "../repositories/photoRepository.ts";
 import { HomologationStatus } from "../types/homologation.types.ts";
 import type { AuthContext } from "../types/auth.types.ts";
 import { z } from "../deps.ts";
 
 const homologationRepository = new HomologationRepository();
 const homologationService = new HomologationService();
+const photoRepository = new PhotoRepository();
 
 const ApproveRejectSchema = z.object({
     reason: z.string().optional(),
@@ -33,6 +35,47 @@ export class AdminController {
             };
         } catch (error) {
             console.error("List all homologations error:", error);
+            ctx.response.status = 500;
+            ctx.response.body = { error: "Internal server error" };
+        }
+    }
+
+    /**
+     * GET /api/admin/homologations/:id
+     * Get a single homologation with full details including photos (admin only)
+     */
+    async getById(ctx: Context) {
+        try {
+            const id = ctx.params.id;
+            console.log("AdminController.getById called with id:", id);
+            console.log("Request path:", ctx.request.url.pathname);
+            console.log("Request method:", ctx.request.method);
+
+            if (!id) {
+                ctx.response.status = 400;
+                ctx.response.body = { error: "Homologation ID is required" };
+                return;
+            }
+
+            const homologation = await homologationRepository.findById(id);
+            console.log("Homologation found:", !!homologation);
+
+            if (!homologation) {
+                ctx.response.status = 404;
+                ctx.response.body = { error: "Homologation not found" };
+                return;
+            }
+
+            // Fetch associated photos
+            const photos = await photoRepository.findByHomologationId(id);
+
+            ctx.response.status = 200;
+            ctx.response.body = {
+                ...homologation,
+                photos,
+            };
+        } catch (error) {
+            console.error("Get homologation by ID error:", error);
             ctx.response.status = 500;
             ctx.response.body = { error: "Internal server error" };
         }
@@ -247,6 +290,48 @@ export class AdminController {
             ctx.response.body = result.homologation;
         } catch (error) {
             console.error("Complete homologation error:", error);
+            ctx.response.status = 500;
+            ctx.response.body = { error: "Internal server error" };
+        }
+    }
+
+    /**
+     * DELETE /api/admin/homologations/:id
+     * Soft delete a homologation (admin only)
+     */
+    async delete(ctx: Context) {
+        try {
+            const id = ctx.params.id;
+
+            if (!id) {
+                ctx.response.status = 400;
+                ctx.response.body = { error: "Homologation ID is required" };
+                return;
+            }
+
+            const auth = ctx.state.auth as AuthContext;
+
+            // Check if homologation exists
+            const homologation = await homologationRepository.findById(id);
+            if (!homologation) {
+                ctx.response.status = 404;
+                ctx.response.body = { error: "Homologation not found" };
+                return;
+            }
+
+            // Soft delete the homologation
+            const deleted = await homologationRepository.softDelete(id, auth.user.id);
+
+            if (!deleted) {
+                ctx.response.status = 500;
+                ctx.response.body = { error: "Failed to delete homologation" };
+                return;
+            }
+
+            ctx.response.status = 200;
+            ctx.response.body = { message: "Homologation deleted successfully" };
+        } catch (error) {
+            console.error("Delete homologation error:", error);
             ctx.response.status = 500;
             ctx.response.body = { error: "Internal server error" };
         }
