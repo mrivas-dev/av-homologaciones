@@ -61,14 +61,14 @@ The Vehicle Homologation System is designed to manage the certification process 
 - `GET /api/photos/homologation/:homologationId` - List all photos for a homologation
 - `GET /api/photos/:id` - Get photo metadata by ID
 - `GET /uploads/:fileName` - Serve photo file (static file serving)
-- `DELETE /api/photos/:id` - Remove a photo (admin only)
+- `DELETE /api/photos/:id` - Remove a photo (public - users can delete their own photos)
 
 #### Security Measures
 - File type validation (MIME type and extension checking)
 - File size limits (default 10MB, configurable via `MAX_FILE_SIZE`)
 - Directory traversal protection for file serving
 - Secure file naming convention (prevents conflicts and unauthorized access)
-- Access control based on user roles (admin-only deletion)
+- Public deletion allowed for users to manage their own photos
 
 ### 3. Status Flow
 ```

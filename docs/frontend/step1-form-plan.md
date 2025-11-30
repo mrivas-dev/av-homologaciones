@@ -27,7 +27,7 @@ The form allows users to:
 | `POST /api/homologations/:id/submit` | POST | Submit for review |
 | `POST /api/photos` | POST | Upload photo (multipart/form-data) |
 | `GET /api/photos/homologation/:id` | GET | List photos for homologation |
-| `DELETE /api/photos/:id` | DELETE | Delete photo (admin only) |
+| `DELETE /api/photos/:id` | DELETE | Delete photo (public - users can delete their own photos) |
 
 ### Photo Upload Requirements
 
@@ -110,7 +110,9 @@ interface Photo {
    - Click to select files
    - Preview thumbnails
    - Upload progress indicator
-   - Delete functionality
+   - Delete functionality with confirmation dialog
+   - Delete button appears on hover
+   - Loading state during deletion
    - 6-photo limit enforcement
    - File type/size validation on client side
 
@@ -191,8 +193,9 @@ interface Photo {
 1. **Example photos** - Three example thumbnails (Frontal, Lateral, Chasis) with labels
 2. **Empty slot** - Dashed border with "+" icon
 3. **Uploading** - Progress bar/spinner
-4. **Uploaded** - Thumbnail with delete button
-5. **Error** - Red border with error message
+4. **Uploaded** - Thumbnail with delete button (appears on hover)
+5. **Deleting** - Loading state with spinner during deletion
+6. **Error** - Red border with error message
 
 ## Validation Rules
 
@@ -303,6 +306,9 @@ export async function deletePhoto(
 - [x] Photos display as thumbnails
 - [x] Upload progress is visible
 - [x] Example photos section showing acceptable photo types
+- [x] Delete functionality with confirmation dialog
+- [x] Delete button appears on hover
+- [x] Loading state during deletion
 - [x] Form validates before proceeding to Step 2
 - [x] Changes are saved to the backend
 - [x] Auto-save on step navigation

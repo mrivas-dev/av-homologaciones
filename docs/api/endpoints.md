@@ -308,12 +308,182 @@ GET /uploads/:fileName
 
 **Note:** The `fileName` parameter should be the filename only (e.g., `uuid_timestamp.jpg`), not the full path. Directory traversal attempts are blocked for security.
 
-### Delete Photo (Admin Only)
+### Delete Photo
 
 #### Request
 ```
 DELETE /api/photos/:id
-Authorization: Bearer <admin-token>
+```
+
+**Note:** This endpoint is public (no authentication required). Users can delete photos from their own homologations.
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "message": "Photo deleted successfully"
+}
+```
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "Photo not found"
+}
+```
+
+---
+
+## Payment Endpoints
+
+All payment endpoints are public (no authentication required).
+
+### Create Payment
+
+Create a payment record for a homologation.
+
+#### Request
+```
+POST /api/payments
+Content-Type: application/json
+
+{
+  "homologationId": "uuid",
+  "amount": 100,
+  "paymentGateway": "MercadoPago"
+}
+```
+
+**Note:** Amount is in cents (e.g., 100 = $1.00). `paymentGateway` defaults to "MercadoPago" if not provided.
+
+#### Response
+**Success (201 Created)**
+```json
+{
+  "id": "uuid",
+  "homologationId": "uuid",
+  "timestamp": "2024-11-30T10:00:00.000Z",
+  "amount": 100,
+  "receiptPath": null,
+  "paymentGateway": "MercadoPago",
+  "createdAt": "2024-11-30T10:00:00.000Z"
+}
+```
+
+### List Payments by Homologation
+
+#### Request
+```
+GET /api/payments/homologation/:homologationId
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "homologationId": "uuid",
+      "timestamp": "2024-11-30T10:00:00.000Z",
+      "amount": 100,
+      "receiptPath": null,
+      "paymentGateway": "MercadoPago"
+    }
+  ],
+  "total": 1,
+  "totalPaid": 100
+}
+```
+
+### Check Payment Status
+
+Check if a homologation has been paid.
+
+#### Request
+```
+GET /api/payments/check/:homologationId
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "isPaid": true,
+  "totalPaid": 100
+}
+```
+
+### Get Payment by ID
+
+#### Request
+```
+GET /api/payments/:id
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "id": "uuid",
+  "homologationId": "uuid",
+  "timestamp": "2024-11-30T10:00:00.000Z",
+  "amount": 100,
+  "receiptPath": "./uploads/receipt_uuid_timestamp.pdf",
+  "paymentGateway": "MercadoPago"
+}
+```
+
+### Upload Receipt
+
+Upload a receipt (photo or PDF) for a payment.
+
+#### Request
+```
+POST /api/payments/:id/receipt
+Content-Type: multipart/form-data
+
+file: <image or PDF file>
+```
+
+#### Supported File Types
+- JPEG/JPG
+- PNG
+- WebP
+- PDF
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "id": "uuid",
+  "homologationId": "uuid",
+  "timestamp": "2024-11-30T10:00:00.000Z",
+  "amount": 100,
+  "receiptPath": "./uploads/receipt_uuid_timestamp.pdf",
+  "paymentGateway": "MercadoPago"
+}
+```
+
+### Download Receipt
+
+Download the receipt file for a payment (public endpoint - no auth required).
+
+#### Request
+```
+GET /api/payments/:id/receipt
+```
+
+#### Response
+**Success (200 OK)**
+- Returns the binary file data with appropriate `Content-Type` header
+- `Content-Disposition: attachment; filename="receipt_uuid_timestamp.pdf"`
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "No receipt uploaded for this payment"
+}
 ```
 
 ---

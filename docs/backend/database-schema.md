@@ -86,6 +86,29 @@ Stores metadata for uploaded photos and documents.
 - idx_photos_homologation (homologation_id)
 - idx_photos_created_at (created_at)
 
+### payments
+Stores payment records for homologations. A homologation can have multiple payments.
+
+| Column | Type | Description | Constraints |
+|--------|------|-------------|-------------|
+| id | VARCHAR(36) | Primary key, UUID | PRIMARY KEY |
+| homologation_id | VARCHAR(36) | Related homologation | FOREIGN KEY, NOT NULL |
+| timestamp | TIMESTAMP | When payment was made | DEFAULT CURRENT_TIMESTAMP |
+| amount | INT | Amount in cents (e.g., 100 = $1.00) | NOT NULL |
+| receipt_path | VARCHAR(512) | Path to receipt file (photo/PDF) | NULLABLE |
+| payment_gateway | VARCHAR(50) | Payment gateway used | DEFAULT 'MercadoPago' |
+| created_at | TIMESTAMP | Record creation time | DEFAULT CURRENT_TIMESTAMP |
+| created_by | VARCHAR(36) | User who created | FOREIGN KEY to users(id), NOT NULL |
+| is_deleted | BOOLEAN | Soft delete flag | DEFAULT FALSE |
+| deleted_at | TIMESTAMP | When record was deleted | NULLABLE |
+| deleted_by | VARCHAR(36) | User who deleted | FOREIGN KEY to users(id) |
+
+**Indexes:**
+- PRIMARY KEY (id)
+- idx_payments_homologation (homologation_id)
+- idx_payments_timestamp (timestamp)
+- idx_payments_gateway (payment_gateway)
+
 ### audit_logs
 Tracks all significant changes in the system.
 
@@ -128,7 +151,14 @@ Tracks all significant changes in the system.
    - created_by → id
    - deleted_by → id
 
-5. **audit_logs → users**
+5. **payments → homologations**
+   - homologation_id → id (CASCADE on delete)
+
+6. **payments → users**
+   - created_by → id
+   - deleted_by → id
+
+7. **audit_logs → users**
    - created_by → id
    - deleted_by → id
 

@@ -79,9 +79,17 @@ Step 1 is being enhanced to include an editable form and photo upload. See [Step
 - Supported formats: JPEG, PNG, WebP, HEIC, PDF
 - Max file size: 10MB per file
 - Drag-and-drop or click to upload
-- Thumbnail gallery with delete option
+- Thumbnail gallery with delete functionality
 - Upload progress indicator
 - Example photos section showing acceptable photo types (Frontal, Lateral, Chasis)
+
+**Photo Management:**
+- **Delete Photos**: Users can delete their own photos
+  - Delete button appears on hover over each photo thumbnail
+  - Confirmation dialog prevents accidental deletion
+  - Loading state with spinner during deletion
+  - Error handling with user feedback
+  - Photos are immediately removed from the gallery after successful deletion
 
 **Auto-Save Functionality:**
 - Changes are automatically saved when navigating between steps
@@ -190,6 +198,9 @@ HomologationTrackingPage
 │   ├── TrailerInfoForm        # Trailer details form
 │   ├── OwnerInfoForm          # Owner details form  
 │   └── PhotoUpload            # Drag-drop upload zone + thumbnail gallery
+│       ├── Example photos     # Frontal, Lateral, Chasis examples
+│       ├── Photo thumbnails   # With delete button on hover
+│       └── Upload zone        # Drag-drop or click to upload
 ├── PaymentStep                # Step 2 content
 │   ├── Price display          # ARS $1 (configurable)
 │   └── MercadoPago button     # Payment button with logo
@@ -296,6 +307,38 @@ Get all photos for a homologation
 }
 ```
 
+#### DELETE /api/photos/:id
+Delete a photo (public - users can delete their own photos)
+
+**Request:**
+```
+DELETE /api/photos/:id
+```
+
+**Note:** This endpoint is public (no authentication required). Users can delete photos from their own homologations.
+
+**Response:**
+**Success (200 OK)**
+```json
+{
+  "message": "Photo deleted successfully"
+}
+```
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "Photo not found"
+}
+```
+
+**Error (500 Internal Server Error)**
+```json
+{
+  "error": "Internal server error"
+}
+```
+
 #### PATCH /api/homologations/:id/status
 Update homologation status (used for payment)
 
@@ -368,8 +411,10 @@ Planned features for future phases:
 - [x] OwnerInfoForm component  
 - [x] PhotoUpload component with drag-drop
 - [x] PhotoGallery component (integrated in PhotoUpload)
+- [x] Photo deletion functionality
+- [x] Example photos section (Frontal, Lateral, Chasis)
 - [x] Form validation
-- [x] API integration (updateHomologation, uploadPhoto, getPhotos)
+- [x] API integration (updateHomologation, uploadPhoto, getPhotos, deletePhoto)
 - [x] Auto-save functionality on step navigation
 - [x] Manual save button
 - [x] Change tracking and visual feedback
