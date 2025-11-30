@@ -37,9 +37,14 @@
 # Navigate to backend directory
 cd backend
 
-# Start the server
-deno run --allow-net --allow-env --allow-read main.ts
+# Start the server using deno task (recommended)
+deno task dev
+
+# Or manually with all required permissions
+deno run --allow-net --allow-env --allow-read --allow-write --allow-sys main.ts
 ```
+
+**Note:** The `--allow-write` permission is required for photo uploads to work. The `deno task dev` command includes all necessary permissions.
 
 ### Using Docker (Optional)
 1. Make sure Docker is installed and running
@@ -54,7 +59,7 @@ deno run --allow-net --allow-env --allow-read main.ts
 
 ### Run Tests
 ```bash
-deno test --allow-net --allow-env --allow-read
+deno test --allow-net --allow-env --allow-read --allow-write
 ```
 
 ## Environment Variables

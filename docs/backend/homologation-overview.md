@@ -50,23 +50,25 @@ The Vehicle Homologation System is designed to manage the certification process 
 ### Photo Storage and Management
 
 #### Storage Implementation
-- **Database Storage**:
-  - Photos are stored as binary data in the database
-  - Each photo is associated with a unique identifier (UUID)
-  - Metadata (timestamp, uploader, vehicle ID) is stored with each photo
+- **File System Storage**:
+  - Photos are stored on the file system in the `./uploads/` directory (configurable via `UPLOAD_DIR` environment variable)
+  - Files are saved with a unique naming convention: `{homologationId}_{timestamp}.{extension}`
+  - Each photo is associated with a unique identifier (UUID) in the database
+  - Metadata (filename, file path, file size, MIME type, timestamp, uploader, vehicle ID) is stored in the database
 
 #### API Endpoints for Photos
-- `POST /api/photos` - Upload new photo
-- `GET /api/photos/:homologationId` - List all photos for a homologation
-- `GET /api/photos/:photoId` - Get specific photo
-- `DELETE /api/photos/:photoId` - Remove a photo
+- `POST /api/photos` - Upload new photo (multipart/form-data)
+- `GET /api/photos/homologation/:homologationId` - List all photos for a homologation
+- `GET /api/photos/:id` - Get photo metadata by ID
+- `GET /uploads/:fileName` - Serve photo file (static file serving)
+- `DELETE /api/photos/:id` - Remove a photo (admin only)
 
 #### Security Measures
-- File type validation
-- Virus scanning for all uploads
-- Access control based on user roles
-- Automatic image optimization
-- Secure file naming convention
+- File type validation (MIME type and extension checking)
+- File size limits (default 10MB, configurable via `MAX_FILE_SIZE`)
+- Directory traversal protection for file serving
+- Secure file naming convention (prevents conflicts and unauthorized access)
+- Access control based on user roles (admin-only deletion)
 
 ### 3. Status Flow
 ```

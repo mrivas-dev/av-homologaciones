@@ -277,6 +277,37 @@ GET /api/photos/homologation/:homologationId
 GET /api/photos/:id
 ```
 
+### Serve Photo File
+
+Serves the actual photo file from the uploads directory. This endpoint is used to display photos in the frontend.
+
+#### Request
+```
+GET /uploads/:fileName
+```
+
+#### Response
+**Success (200 OK)**
+- Returns the binary file data with appropriate `Content-Type` header
+- Supported MIME types: `image/jpeg`, `image/png`, `image/webp`, `image/heic`, `image/heif`, `application/pdf`
+- Includes `Cache-Control: public, max-age=31536000` header for browser caching
+
+**Error (400 Bad Request)**
+```json
+{
+  "error": "Invalid filename"
+}
+```
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "File not found"
+}
+```
+
+**Note:** The `fileName` parameter should be the filename only (e.g., `uuid_timestamp.jpg`), not the full path. Directory traversal attempts are blocked for security.
+
 ### Delete Photo (Admin Only)
 
 #### Request
