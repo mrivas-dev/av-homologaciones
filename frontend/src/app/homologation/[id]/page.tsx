@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useImperativeHandle, forwardRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
   getHomologationById,
   updateHomologation,
@@ -396,6 +396,7 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
         onPhotosChange={onPhotosChange}
         disabled={formsDisabled}
         isLocked={isPaid}
+        trailerType={trailerData.trailerType || homologation.trailerType}
       />
     </div>
   );
@@ -608,6 +609,7 @@ function ReviewStep() {
 // Main Page Component
 export default function HomologationTrackingPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const [homologation, setHomologation] = useState<Homologation | null>(null);
@@ -764,7 +766,13 @@ export default function HomologationTrackingPage() {
             <FiAlertCircle className="w-8 h-8 text-red-400" />
           </div>
           <h2 className="text-xl font-semibold text-white mb-2">Error</h2>
-          <p className="text-slate-400">{error}</p>
+          <p className="text-slate-400 mb-6">{error}</p>
+          <button
+            onClick={() => router.push('/')}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-amber-500/20"
+          >
+            Ir al inicio
+          </button>
         </div>
       </div>
     );
@@ -778,7 +786,13 @@ export default function HomologationTrackingPage() {
             <FiAlertCircle className="w-8 h-8 text-slate-500" />
           </div>
           <h2 className="text-xl font-semibold text-white mb-2">No encontrado</h2>
-          <p className="text-slate-400">Homologación no encontrada</p>
+          <p className="text-slate-400 mb-6">Homologación no encontrada</p>
+          <button
+            onClick={() => router.push('/')}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-amber-500/20"
+          >
+            Ir al inicio
+          </button>
         </div>
       </div>
     );

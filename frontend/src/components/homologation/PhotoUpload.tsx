@@ -22,6 +22,7 @@ interface PhotoUploadProps {
   onPhotosChange: (photos: Photo[]) => void;
   disabled?: boolean;
   isLocked?: boolean;
+  trailerType?: string;
 }
 
 export default function PhotoUpload({
@@ -30,6 +31,7 @@ export default function PhotoUpload({
   onPhotosChange,
   disabled = false,
   isLocked = false,
+  trailerType,
 }: PhotoUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -204,42 +206,139 @@ export default function PhotoUpload({
         <p className="text-sm font-medium text-slate-300 mb-3">
           Ejemplos de fotos aceptadas:
         </p>
-        <div className="grid grid-cols-3 gap-3">
-          {/* Frontal Example */}
-          <div className="flex flex-col items-center">
-            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-2">
-              <img
-                src="/ejemplo_trailer_frontal.jpg"
-                alt="Ejemplo de foto frontal de trailer"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-xs text-slate-400">Frontal</span>
-          </div>
-
-          {/* Lateral Example */}
-          <div className="flex flex-col items-center">
-            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-2">
-              <img
-                src="/ejemplo_trailer_lateral.jpg"
-                alt="Ejemplo de foto lateral de trailer"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-xs text-slate-400">Lateral</span>
-          </div>
-
-          {/* Chasis Example */}
-          <div className="flex flex-col items-center">
-            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-2">
-              <img
-                src="/ejemplo_trailer_chasis.jpg"
-                alt="Ejemplo de foto de chasis de trailer"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-xs text-slate-400">Chasis</span>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+          {trailerType === 'Trailer' && (
+            <>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/trailer/frontal.jpeg"
+                    alt="Ejemplo de foto frontal de trailer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Frontal</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/trailer/lateral.jpeg"
+                    alt="Ejemplo de foto lateral de trailer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Lateral</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/trailer/trasera.jpeg"
+                    alt="Ejemplo de foto trasera de trailer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Trasera</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/ficha_electrica.jpeg"
+                    alt="Ejemplo de ficha eléctrica"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Ficha eléctrica</span>
+              </div>
+            </>
+          )}
+          {trailerType === 'Rolling Box' && (
+            <>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/rollingbox/frontal.jpeg"
+                    alt="Ejemplo de foto frontal de rolling box"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Frontal</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/rollingbox/lateral.jpeg"
+                    alt="Ejemplo de foto lateral de rolling box"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Lateral</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/rollingbox/trasera.jpeg"
+                    alt="Ejemplo de foto trasera de rolling box"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Trasera</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/rollingbox/rueda_auxilio.jpeg"
+                    alt="Ejemplo de rueda de auxilio"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Rueda de auxilio</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/reference_photos/ficha_electrica.jpeg"
+                    alt="Ejemplo de ficha eléctrica"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Ficha eléctrica</span>
+              </div>
+            </>
+          )}
+          {(trailerType === 'Motorhome' || !trailerType) && (
+            <>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/ejemplo_trailer_frontal.jpg"
+                    alt="Ejemplo de foto frontal de trailer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Frontal</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/ejemplo_trailer_lateral.jpg"
+                    alt="Ejemplo de foto lateral de trailer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Lateral</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                  <img
+                    src="/ejemplo_trailer_chasis.jpg"
+                    alt="Ejemplo de foto de chasis de trailer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs text-slate-400">Chasis</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
