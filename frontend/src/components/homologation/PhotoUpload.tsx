@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { FiCamera, FiUpload, FiX, FiLoader, FiAlertCircle, FiImage, FiTrash2 } from 'react-icons/fi';
+import { FiCamera, FiUpload, FiX, FiLoader, FiAlertCircle, FiImage, FiTrash2, FiLock } from 'react-icons/fi';
 import { Photo, uploadPhoto, getPhotoUrl, deletePhoto } from '../../utils/api';
 
 const MAX_PHOTOS = 6;
@@ -21,6 +21,7 @@ interface PhotoUploadProps {
   photos: Photo[];
   onPhotosChange: (photos: Photo[]) => void;
   disabled?: boolean;
+  isLocked?: boolean;
 }
 
 export default function PhotoUpload({
@@ -28,6 +29,7 @@ export default function PhotoUpload({
   photos,
   onPhotosChange,
   disabled = false,
+  isLocked = false,
 }: PhotoUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -175,16 +177,26 @@ export default function PhotoUpload({
     }
   };
 
-  const canUpload = remainingSlots > 0 && !disabled;
+  // Can only upload if not disabled, not locked, and has remaining slots
+  const canUpload = remainingSlots > 0 && !disabled && !isLocked;
 
   return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+    <div className={`bg-slate-900/50 border rounded-xl p-6 ${isLocked ? 'border-blue-500/30' : 'border-slate-800'}`}>
       <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
         <FiCamera className="w-5 h-5 text-amber-400" />
         Fotos del Trailer
+        {isLocked && (
+          <span className="ml-auto flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-400">
+            <FiLock className="w-3 h-3" />
+            Bloqueado
+          </span>
+        )}
       </h3>
       <p className="text-sm text-slate-400 mb-6">
-        Máximo {MAX_PHOTOS} fotos • JPG, PNG, WebP, HEIC, PDF • Max 10MB por archivo
+        {isLocked 
+          ? 'Las fotos no pueden ser modificadas después del pago'
+          : `Máximo ${MAX_PHOTOS} fotos • JPG, PNG, WebP, HEIC, PDF • Max 10MB por archivo`
+        }
       </p>
 
       {/* Example Photos Section */}
@@ -265,35 +277,42 @@ export default function PhotoUpload({
               </div>
             )}
             
-            {/* Hover overlay with delete button */}
+            {/* Hover overlay with delete button - only show when not locked */}
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
               <span className="text-xs text-white truncate px-2 max-w-full">{photo.fileName}</span>
-              <button
-                onClick={() => handleDeletePhoto(photo.id)}
-                disabled={disabled || deletingPhotoId === photo.id}
-                className={`
-                  flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
-                  transition-all duration-200
-                  ${deletingPhotoId === photo.id
-                    ? 'bg-slate-700 text-slate-400 cursor-wait'
-                    : 'bg-red-500/90 hover:bg-red-600 text-white'
-                  }
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                `}
-                title="Eliminar foto"
-              >
-                {deletingPhotoId === photo.id ? (
-                  <>
-                    <FiLoader className="w-4 h-4 animate-spin" />
-                    <span>Eliminando...</span>
-                  </>
-                ) : (
-                  <>
-                    <FiTrash2 className="w-4 h-4" />
-                    <span>Eliminar</span>
-                  </>
-                )}
-              </button>
+              {isLocked ? (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                  <FiLock className="w-4 h-4" />
+                  <span>Bloqueado</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleDeletePhoto(photo.id)}
+                  disabled={disabled || deletingPhotoId === photo.id}
+                  className={`
+                    flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                    transition-all duration-200
+                    ${deletingPhotoId === photo.id
+                      ? 'bg-slate-700 text-slate-400 cursor-wait'
+                      : 'bg-red-500/90 hover:bg-red-600 text-white'
+                    }
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                  `}
+                  title="Eliminar foto"
+                >
+                  {deletingPhotoId === photo.id ? (
+                    <>
+                      <FiLoader className="w-4 h-4 animate-spin" />
+                      <span>Eliminando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiTrash2 className="w-4 h-4" />
+                      <span>Eliminar</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         ))}

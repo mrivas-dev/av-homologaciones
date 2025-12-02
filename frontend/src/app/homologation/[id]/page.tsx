@@ -163,6 +163,40 @@ interface FormErrors {
   owner: Partial<Record<keyof OwnerFormData, string>>;
 }
 
+// Required fields validation for Step 1
+interface RequiredFieldsValidation {
+  isComplete: boolean;
+  missingFields: string[];
+}
+
+function validateRequiredFields(homologation: Homologation): RequiredFieldsValidation {
+  const missingFields: string[] = [];
+
+  // Trailer required fields
+  if (!homologation.trailerType) {
+    missingFields.push('Tipo de Trailer');
+  }
+  if (!homologation.trailerDimensions) {
+    missingFields.push('Dimensiones');
+  }
+  if (!homologation.trailerNumberOfAxles) {
+    missingFields.push('Número de Ejes');
+  }
+  if (!homologation.trailerLicensePlateNumber) {
+    missingFields.push('Patente');
+  }
+
+  // Owner required fields
+  if (!homologation.ownerFullName) {
+    missingFields.push('Nombre Completo');
+  }
+
+  return {
+    isComplete: missingFields.length === 0,
+    missingFields,
+  };
+}
+
 // Ref handle for GeneralInfoStep
 export interface GeneralInfoStepHandle {
   saveChanges: () => Promise<boolean>;
@@ -176,12 +210,14 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
   onHomologationUpdate: (data: Homologation) => void;
   onPhotosChange: (photos: Photo[]) => void;
   onSavingChange: (isSaving: boolean) => void;
+  isPaid: boolean;
 }>(function GeneralInfoStep({
   homologation,
   photos,
   onHomologationUpdate,
   onPhotosChange,
   onSavingChange,
+  isPaid,
 }, ref) {
   const [trailerData, setTrailerData] = useState<TrailerFormData>({
     trailerType: homologation.trailerType || '',
@@ -274,53 +310,74 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
     await saveChanges();
   };
 
+  // Forms are disabled when saving OR when already paid
+  const formsDisabled = isSaving || isPaid;
+
   return (
     <div className="space-y-6 animate-in">
-      {/* Save button and status */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {saveMessage && (
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${saveMessage.type === 'success'
-                ? 'bg-emerald-500/10 text-emerald-400'
-                : 'bg-red-500/10 text-red-400'
-              }`}>
-              {saveMessage.type === 'success' ? (
-                <FiCheck className="w-4 h-4" />
-              ) : (
-                <FiAlertCircle className="w-4 h-4" />
-              )}
-              {saveMessage.text}
-            </div>
-          )}
+      {/* Paid lock notice */}
+      {isPaid && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+            <FiCheck className="w-5 h-5 text-blue-400" />
+          </div>
+          <div>
+            <p className="font-medium text-blue-400">Trámite pagado</p>
+            <p className="text-sm text-slate-400">
+              Los campos no pueden ser modificados después del pago
+            </p>
+          </div>
         </div>
+      )}
 
-        <button
-          onClick={handleManualSave}
-          disabled={isSaving || !hasChanges}
-          className={`
-            flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
-            transition-all duration-200
-            ${hasChanges
-              ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20'
-              : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-            }
-          `}
-        >
-          {isSaving ? (
-            <FiLoader className="w-4 h-4 animate-spin" />
-          ) : (
-            <FiSave className="w-4 h-4" />
-          )}
-          {isSaving ? 'Guardando...' : 'Guardar cambios'}
-        </button>
-      </div>
+      {/* Save button and status - Hidden when paid */}
+      {!isPaid && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {saveMessage && (
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${saveMessage.type === 'success'
+                  ? 'bg-emerald-500/10 text-emerald-400'
+                  : 'bg-red-500/10 text-red-400'
+                }`}>
+                {saveMessage.type === 'success' ? (
+                  <FiCheck className="w-4 h-4" />
+                ) : (
+                  <FiAlertCircle className="w-4 h-4" />
+                )}
+                {saveMessage.text}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleManualSave}
+            disabled={isSaving || !hasChanges}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
+              transition-all duration-200
+              ${hasChanges
+                ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20'
+                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+              }
+            `}
+          >
+            {isSaving ? (
+              <FiLoader className="w-4 h-4 animate-spin" />
+            ) : (
+              <FiSave className="w-4 h-4" />
+            )}
+            {isSaving ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+        </div>
+      )}
 
       {/* Trailer Info Form */}
       <TrailerInfoForm
         initialData={trailerData}
         onChange={setTrailerData}
         errors={errors.trailer}
-        disabled={isSaving}
+        disabled={formsDisabled}
+        isLocked={isPaid}
       />
 
       {/* Owner Info Form */}
@@ -328,7 +385,8 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
         initialData={ownerData}
         onChange={setOwnerData}
         errors={errors.owner}
-        disabled={isSaving}
+        disabled={formsDisabled}
+        isLocked={isPaid}
       />
 
       {/* Photo Upload */}
@@ -336,7 +394,8 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
         homologationId={homologation.id}
         photos={photos}
         onPhotosChange={onPhotosChange}
-        disabled={isSaving}
+        disabled={formsDisabled}
+        isLocked={isPaid}
       />
     </div>
   );
@@ -353,9 +412,13 @@ const TRAILER_TYPE_PRICES: Record<string, number> = {
 function PaymentStep({
   homologation,
   onHomologationUpdate,
+  requiredFieldsValidation,
+  onGoToStep1,
 }: {
   homologation: Homologation;
   onHomologationUpdate: (data: Homologation) => void;
+  requiredFieldsValidation: RequiredFieldsValidation;
+  onGoToStep1: () => void;
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -366,8 +429,10 @@ function PaymentStep({
     ? (TRAILER_TYPE_PRICES[homologation.trailerType] || TRAILER_TYPE_PRICES['Trailer'])
     : TRAILER_TYPE_PRICES['Trailer'];
 
+  const canPay = requiredFieldsValidation.isComplete;
+
   const handlePayment = async () => {
-    if (isProcessing || homologation.isPaid) return;
+    if (isProcessing || homologation.isPaid || !canPay) return;
 
     setIsProcessing(true);
     setError(null);
@@ -403,6 +468,39 @@ function PaymentStep({
             Complete el pago para continuar con el proceso de homologación
           </p>
         </div>
+
+        {/* Missing Fields Warning */}
+        {!canPay && !isPaid && (
+          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <FiAlertCircle className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-amber-400 mb-2">
+                  Campos obligatorios incompletos
+                </p>
+                <p className="text-sm text-slate-400 mb-3">
+                  Complete los siguientes campos en el paso anterior para poder realizar el pago:
+                </p>
+                <ul className="text-sm text-slate-300 space-y-1 mb-4">
+                  {requiredFieldsValidation.missingFields.map((field, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                      {field}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={onGoToStep1}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Completar información
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Price Display */}
         <div className="bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-700">
@@ -451,12 +549,12 @@ function PaymentStep({
         {!isPaid && (
           <button
             onClick={handlePayment}
-            disabled={isProcessing}
+            disabled={isProcessing || !canPay}
             className={`
               w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg
               font-semibold text-white transition-all duration-200
-              ${isProcessing
-                ? 'bg-slate-700 cursor-wait'
+              ${isProcessing || !canPay
+                ? 'bg-slate-700 cursor-not-allowed opacity-50'
                 : 'bg-[#009EE3] hover:bg-[#0088C7] shadow-lg shadow-[#009EE3]/20 hover:shadow-[#009EE3]/30'
               }
             `}
@@ -602,6 +700,18 @@ export default function HomologationTrackingPage() {
     setIsAutoSaving(saving);
   };
 
+  // Compute required fields validation
+  const requiredFieldsValidation = homologation 
+    ? validateRequiredFields(homologation) 
+    : { isComplete: false, missingFields: [] };
+
+  const isPaid = homologation?.isPaid === true;
+
+  // Navigate to step 1 (for incomplete fields warning)
+  const handleGoToStep1 = () => {
+    setCurrentStep(1);
+  };
+
   // Render step content based on current step
   const renderStepContent = () => {
     if (!homologation) return null;
@@ -616,6 +726,7 @@ export default function HomologationTrackingPage() {
             onHomologationUpdate={handleHomologationUpdate}
             onPhotosChange={handlePhotosChange}
             onSavingChange={handleSavingChange}
+            isPaid={isPaid}
           />
         );
       case 2:
@@ -623,6 +734,8 @@ export default function HomologationTrackingPage() {
           <PaymentStep
             homologation={homologation}
             onHomologationUpdate={handleHomologationUpdate}
+            requiredFieldsValidation={requiredFieldsValidation}
+            onGoToStep1={handleGoToStep1}
           />
         );
       case 3:

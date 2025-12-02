@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FiTruck, FiMaximize, FiHash, FiCreditCard } from 'react-icons/fi';
+import { FiTruck, FiMaximize, FiHash, FiCreditCard, FiLock } from 'react-icons/fi';
 
 // Trailer types matching backend enum
 const TRAILER_TYPES = [
@@ -22,6 +22,7 @@ interface TrailerInfoFormProps {
   onChange: (data: TrailerFormData) => void;
   errors?: Partial<Record<keyof TrailerFormData, string>>;
   disabled?: boolean;
+  isLocked?: boolean;
 }
 
 interface DimensionValues {
@@ -76,6 +77,7 @@ export default function TrailerInfoForm({
   onChange,
   errors = {},
   disabled = false,
+  isLocked = false,
 }: TrailerInfoFormProps) {
   const [formData, setFormData] = useState<TrailerFormData>(initialData);
   const [dimensions, setDimensions] = useState<DimensionValues>(
@@ -118,10 +120,16 @@ export default function TrailerInfoForm({
   };
 
   return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+    <div className={`bg-slate-900/50 border rounded-xl p-6 ${isLocked ? 'border-blue-500/30' : 'border-slate-800'}`}>
       <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
         <FiTruck className="w-5 h-5 text-amber-400" />
         Información del Trailer
+        {isLocked && (
+          <span className="ml-auto flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-400">
+            <FiLock className="w-3 h-3" />
+            Bloqueado
+          </span>
+        )}
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -201,7 +209,7 @@ export default function TrailerInfoForm({
                 value={dimensions.length}
                 onChange={(e) => handleDimensionChange('length', e.target.value)}
                 disabled={disabled}
-                placeholder="Largo"
+                placeholder="Largo en metros (m)"
                 className={`
                   w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white text-center
                   placeholder:text-slate-500
@@ -220,7 +228,7 @@ export default function TrailerInfoForm({
                 value={dimensions.width}
                 onChange={(e) => handleDimensionChange('width', e.target.value)}
                 disabled={disabled}
-                placeholder="Ancho"
+                placeholder="Ancho en metros (m)"
                 className={`
                   w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white text-center
                   placeholder:text-slate-500
@@ -239,7 +247,7 @@ export default function TrailerInfoForm({
                 value={dimensions.height}
                 onChange={(e) => handleDimensionChange('height', e.target.value)}
                 disabled={disabled}
-                placeholder="Alto"
+                placeholder="Alto en metros (m)"
                 className={`
                   w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white text-center
                   placeholder:text-slate-500

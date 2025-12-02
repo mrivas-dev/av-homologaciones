@@ -15,6 +15,7 @@ interface OwnerInfoFormProps {
   onChange: (data: OwnerFormData) => void;
   errors?: Partial<Record<keyof OwnerFormData, string>>;
   disabled?: boolean;
+  isLocked?: boolean;
 }
 
 export default function OwnerInfoForm({
@@ -22,6 +23,7 @@ export default function OwnerInfoForm({
   onChange,
   errors = {},
   disabled = false,
+  isLocked = false,
 }: OwnerInfoFormProps) {
   const [formData, setFormData] = useState<OwnerFormData>(initialData);
 
@@ -37,10 +39,16 @@ export default function OwnerInfoForm({
   };
 
   return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+    <div className={`bg-slate-900/50 border rounded-xl p-6 ${isLocked ? 'border-blue-500/30' : 'border-slate-800'}`}>
       <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
         <FiUser className="w-5 h-5 text-amber-400" />
         Información del Propietario
+        {isLocked && (
+          <span className="ml-auto flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-400">
+            <FiLock className="w-3 h-3" />
+            Bloqueado
+          </span>
+        )}
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
