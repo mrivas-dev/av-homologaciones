@@ -81,7 +81,12 @@ Step 1 is being enhanced to include an editable form and photo upload. See [Step
 - Drag-and-drop or click to upload
 - Thumbnail gallery with delete functionality
 - Upload progress indicator
-- Example photos section showing acceptable photo types (Frontal, Lateral, Chasis)
+- **Reference photos section** showing acceptable photo types based on trailer type:
+  - **Trailer**: Frontal, Lateral, Trasera, Ficha eléctrica (4 photos)
+  - **Rolling Box**: Frontal, Lateral, Trasera, Rueda de auxilio, Ficha eléctrica (5 photos)
+  - **Motorhome** (or no type): Frontal, Lateral, Chasis (3 photos)
+- Reference photos update **immediately** when the trailer type selector changes (no save required)
+- Reference photos are displayed in a responsive grid (2-5 columns) and are compact to fit all on the page
 
 **Photo Management:**
 - **Delete Photos**: Users can delete their own photos
@@ -203,7 +208,8 @@ HomologationTrackingPage
 │   ├── TrailerInfoForm        # Trailer details form
 │   ├── OwnerInfoForm          # Owner details form  
 │   └── PhotoUpload            # Drag-drop upload zone + thumbnail gallery
-│       ├── Example photos     # Frontal, Lateral, Chasis examples
+│       ├── Reference photos   # Conditionally shown based on trailerType
+│       │                      # Trailer: 4 photos | Rolling Box: 5 photos | Motorhome: 3 photos
 │       ├── Photo thumbnails   # With delete button on hover
 │       └── Upload zone        # Drag-drop or click to upload
 ├── PaymentStep                # Step 2 content
@@ -417,7 +423,7 @@ Planned features for future phases:
 - [x] PhotoUpload component with drag-drop
 - [x] PhotoGallery component (integrated in PhotoUpload)
 - [x] Photo deletion functionality
-- [x] Example photos section (Frontal, Lateral, Chasis)
+- [x] Reference photos section (trailer-type-based: Trailer, Rolling Box, or Motorhome)
 - [x] Form validation
 - [x] API integration (updateHomologation, uploadPhoto, getPhotos, deletePhoto)
 - [x] Auto-save functionality on step navigation

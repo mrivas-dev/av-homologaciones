@@ -105,7 +105,12 @@ interface Photo {
 ### Phase 3: Photo Upload Component
 
 1. **Create `PhotoUpload` component**
-   - Example photos section (Frontal, Lateral, Chasis)
+   - Reference photos section (conditionally displayed based on `trailerType` prop):
+     - **Trailer**: Frontal, Lateral, Trasera, Ficha eléctrica
+     - **Rolling Box**: Frontal, Lateral, Trasera, Rueda de auxilio, Ficha eléctrica
+     - **Motorhome** (or no type): Frontal, Lateral, Chasis
+   - Responsive grid layout (2-5 columns) for reference photos
+   - Compact design to fit all reference photos on the page
    - Drag-and-drop zone
    - Click to select files
    - Preview thumbnails
@@ -174,10 +179,11 @@ interface Photo {
 │  Formatos: JPG, PNG, WebP, HEIC, PDF • Max 10MB            │
 │                                                              │
 │  Ejemplos de fotos aceptadas:                               │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐                    │
-│  │ Frontal │  │ Lateral │  │ Chasis  │                    │
-│  │ [img]   │  │ [img]   │  │ [img]   │                    │
-│  └─────────┘  └─────────┘  └─────────┘                    │
+│  (Shown based on trailer type - example for "Trailer":)     │
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌──────────────┐        │
+│  │Frontal │ │Lateral │ │Trasera │ │Ficha eléctrica│        │
+│  │ [img]  │ │ [img]  │ │ [img]  │ │   [img]      │        │
+│  └────────┘ └────────┘ └────────┘ └──────────────┘        │
 │                                                              │
 │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────────────┐│
 │  │  📷     │  │  📷     │  │  📷     │  │  + Agregar      ││
@@ -196,7 +202,12 @@ interface Photo {
 
 ### Photo Upload States
 
-1. **Example photos** - Three example thumbnails (Frontal, Lateral, Chasis) with labels
+1. **Reference photos** - Conditionally displayed thumbnails based on trailer type:
+   - Trailer: 4 photos (Frontal, Lateral, Trasera, Ficha eléctrica)
+   - Rolling Box: 5 photos (Frontal, Lateral, Trasera, Rueda de auxilio, Ficha eléctrica)
+   - Motorhome/no type: 3 photos (Frontal, Lateral, Chasis)
+   - Displayed in responsive grid (2-5 columns)
+   - Compact size to fit all on page
 2. **Empty slot** - Dashed border with "+" icon
 3. **Uploading** - Progress bar/spinner
 4. **Uploaded** - Thumbnail with delete button (appears on hover)
@@ -311,7 +322,9 @@ export async function deletePhoto(
 - [x] Photos can be uploaded (up to 6)
 - [x] Photos display as thumbnails
 - [x] Upload progress is visible
-- [x] Example photos section showing acceptable photo types
+- [x] Reference photos section showing acceptable photo types based on trailer type
+- [x] Reference photos change dynamically based on selected trailer type
+- [x] Reference photos update immediately when trailer type selector changes (no save required)
 - [x] Delete functionality with confirmation dialog
 - [x] Delete button appears on hover
 - [x] Loading state during deletion
@@ -351,7 +364,24 @@ export async function deletePhoto(
 ## Related Documentation
 
 - [Homologation Tracking Page](./homologation-tracking-page.md)
-- [Photo Examples Plan](./photo-examples-plan.md) - Implementation details for example photos
+- [Photo Examples Plan](./photo-examples-plan.md) - Implementation details for reference photos (trailer-type-based)
 - [API Endpoints](../api/endpoints.md)
 - [Database Schema](../backend/database-schema.md)
+
+## Recent Updates
+
+### Reference Photos Enhancement (2024)
+
+The PhotoUpload component now displays different reference photos based on the selected trailer type:
+
+- **Trailer Type**: Shows 4 reference photos (Frontal, Lateral, Trasera, Ficha eléctrica)
+- **Rolling Box Type**: Shows 5 reference photos (Frontal, Lateral, Trasera, Rueda de auxilio, Ficha eléctrica)
+- **Motorhome Type** (or no type): Shows 3 reference photos (Frontal, Lateral, Chasis)
+
+**Key Features:**
+- **Real-time Updates**: Reference photos update immediately when the trailer type dropdown changes, without requiring form save
+- **Form State Integration**: Uses current form state value (`trailerData.trailerType`) rather than only saved data
+- **Visual Feedback**: Users get instant visual guidance as they select different trailer types
+
+The reference photos are stored in `/public/reference_photos/` directory and are displayed in a responsive grid layout (2-5 columns) with compact sizing to ensure all photos fit on the page.
 
