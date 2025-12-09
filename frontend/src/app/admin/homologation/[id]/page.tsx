@@ -13,6 +13,7 @@ import {
   HomologationDetail,
   AdminApiError,
 } from '@/utils/adminApi';
+import { StatusChangeModal, getAvailableActions, StatusAction, DocumentUploadSection } from '@/components/admin';
 import {
   FiArrowLeft,
   FiLoader,
@@ -92,117 +93,6 @@ function StatusBadge({ status }: { status: string }) {
 
 function truncateId(id: string): string {
   return id.substring(0, 8);
-}
-
-// Status change modal
-function StatusChangeModal({
-  isOpen,
-  onClose,
-  action,
-  currentStatus,
-  onConfirm,
-  isLoading,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  action: 'approve' | 'reject' | 'incomplete' | 'complete' | null;
-  currentStatus: string;
-  onConfirm: (reason?: string) => Promise<void>;
-  isLoading: boolean;
-}) {
-  const [reason, setReason] = useState('');
-
-  const actionLabels: Record<string, { title: string; description: string; buttonText: string; buttonColor: string }> = {
-    approve: {
-      title: 'Aprobar Homologación',
-      description: 'Estás a punto de aprobar esta homologación.',
-      buttonText: 'Aprobar',
-      buttonColor: 'bg-emerald-500 hover:bg-emerald-600',
-    },
-    reject: {
-      title: 'Rechazar Homologación',
-      description: 'Estás a punto de rechazar esta homologación.',
-      buttonText: 'Rechazar',
-      buttonColor: 'bg-red-500 hover:bg-red-600',
-    },
-    incomplete: {
-      title: 'Marcar como Incompleto',
-      description: 'Estás a punto de marcar esta homologación como incompleta.',
-      buttonText: 'Marcar como Incompleto',
-      buttonColor: 'bg-orange-500 hover:bg-orange-600',
-    },
-    complete: {
-      title: 'Completar Homologación',
-      description: 'Estás a punto de marcar esta homologación como completada.',
-      buttonText: 'Completar',
-      buttonColor: 'bg-purple-500 hover:bg-purple-600',
-    },
-  };
-
-  if (!isOpen || !action) return null;
-
-  const config = actionLabels[action];
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onConfirm(reason || undefined);
-    setReason('');
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-xl max-w-md w-full mx-4">
-        <div className="p-6">
-          <h3 className="text-xl font-bold text-white mb-2">{config.title}</h3>
-          <p className="text-slate-400 mb-6">{config.description}</p>
-
-          <form onSubmit={handleSubmit}>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Motivo (opcional)
-              </label>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Agregar un motivo o comentario..."
-                className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
-                rows={4}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  setReason('');
-                }}
-                disabled={isLoading}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`px-4 py-2 ${config.buttonColor} text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2`}
-              >
-                {isLoading ? (
-                  <>
-                    <FiLoader className="w-4 h-4 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  config.buttonText
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // Delete confirmation modal
@@ -287,7 +177,7 @@ export default function AdminHomologationDetailPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [currentAction, setCurrentAction] = useState<'approve' | 'reject' | 'incomplete' | 'complete' | null>(null);
+  const [currentAction, setCurrentAction] = useState<StatusAction | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
@@ -321,7 +211,7 @@ export default function AdminHomologationDetailPage() {
     }
   }, [isAuthenticated, token, id, loadHomologation]);
 
-  const handleStatusAction = async (action: 'approve' | 'reject' | 'incomplete' | 'complete', reason?: string) => {
+  const handleStatusAction = async (action: StatusAction, reason?: string) => {
     if (!token || !id) return;
 
     setStatusActionLoading(action);
@@ -365,21 +255,6 @@ export default function AdminHomologationDetailPage() {
       const message = err instanceof AdminApiError ? err.message : 'Error al eliminar la homologación';
       alert(message);
       setDeleteLoading(false);
-    }
-  };
-
-  const getAvailableActions = (status: string): Array<'approve' | 'reject' | 'incomplete' | 'complete'> => {
-    switch (status) {
-      case 'Pending Review':
-        return ['incomplete', 'reject'];
-      case 'Payed':
-        return ['approve', 'incomplete', 'reject'];
-      case 'Incomplete':
-        return ['reject'];
-      case 'Approved':
-        return ['complete'];
-      default:
-        return [];
     }
   };
 
@@ -606,6 +481,18 @@ export default function AdminHomologationDetailPage() {
           )}
         </div>
 
+        {/* Admin Documents Section */}
+        {token && (
+          <div className="mb-8">
+            <DocumentUploadSection
+              token={token}
+              homologationId={id}
+              documents={homologation.documents || []}
+              onDocumentChange={loadHomologation}
+            />
+          </div>
+        )}
+
         {/* Status Actions */}
         {availableActions.length > 0 && (
           <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
@@ -692,7 +579,6 @@ export default function AdminHomologationDetailPage() {
           setCurrentAction(null);
         }}
         action={currentAction}
-        currentStatus={homologation.status}
         onConfirm={(reason) => {
           if (currentAction) {
             return handleStatusAction(currentAction, reason);

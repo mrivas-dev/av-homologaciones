@@ -3,7 +3,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { fetchHomologations, HomologationListItem } from '@/utils/adminApi';
+import {
+  fetchHomologations,
+  approveHomologation,
+  rejectHomologation,
+  markHomologationIncomplete,
+  completeHomologation,
+  HomologationListItem,
+  AdminApiError,
+} from '@/utils/adminApi';
+import { StatusChangeModal, getAvailableActions, StatusAction } from '@/components/admin';
 import { 
   FiLogOut, 
   FiLoader, 
@@ -13,7 +22,11 @@ import {
   FiClipboard,
   FiPhone,
   FiCreditCard,
-  FiTag
+  FiTruck,
+  FiCheck,
+  FiX,
+  FiAlertTriangle,
+  FiChevronRight,
 } from 'react-icons/fi';
 
 // Status badge colors and labels
@@ -71,16 +84,18 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function truncateId(id: string): string {
-  return id.substring(0, 8);
-}
-
 export default function AdminDashboardPage() {
   const { user, token, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
   const [homologations, setHomologations] = useState<HomologationListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Status change state
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [currentAction, setCurrentAction] = useState<StatusAction | null>(null);
+  const [selectedHomologationId, setSelectedHomologationId] = useState<string | null>(null);
+  const [statusActionLoading, setStatusActionLoading] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -116,6 +131,48 @@ export default function AdminDashboardPage() {
   const handleLogout = () => {
     logout();
     router.push('/admin/login');
+  };
+
+  // Handle status action click
+  const handleActionClick = (e: React.MouseEvent, homologationId: string, action: StatusAction) => {
+    e.stopPropagation(); // Prevent row click navigation
+    setSelectedHomologationId(homologationId);
+    setCurrentAction(action);
+    setStatusModalOpen(true);
+  };
+
+  // Execute status change
+  const handleStatusChange = async (reason?: string) => {
+    if (!token || !selectedHomologationId || !currentAction) return;
+
+    setStatusActionLoading(true);
+
+    try {
+      switch (currentAction) {
+        case 'approve':
+          await approveHomologation(token, selectedHomologationId, reason);
+          break;
+        case 'reject':
+          await rejectHomologation(token, selectedHomologationId, reason);
+          break;
+        case 'incomplete':
+          await markHomologationIncomplete(token, selectedHomologationId, reason);
+          break;
+        case 'complete':
+          await completeHomologation(token, selectedHomologationId, reason);
+          break;
+      }
+
+      setStatusModalOpen(false);
+      setCurrentAction(null);
+      setSelectedHomologationId(null);
+      await loadHomologations(); // Refresh list
+    } catch (err) {
+      const message = err instanceof AdminApiError ? err.message : 'Error al cambiar el estado';
+      alert(message);
+    } finally {
+      setStatusActionLoading(false);
+    }
   };
 
   // Show loading while checking auth
@@ -227,7 +284,10 @@ export default function AdminDashboardPage() {
                 <thead>
                   <tr className="border-b border-slate-800">
                     <th className="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      ID
+                      Propietario
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      Tipo
                     </th>
                     <th className="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                       Teléfono
@@ -238,69 +298,191 @@ export default function AdminDashboardPage() {
                     <th className="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                       Estado
                     </th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
-                  {homologations.map((item) => (
-                    <tr
-                      key={item.id}
-                      onClick={() => router.push(`/admin/homologation/${item.id}`)}
-                      className="hover:bg-slate-800/50 transition-colors cursor-pointer"
-                    >
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-sm text-slate-300">
-                          {truncateId(item.id)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-slate-300">
-                          {item.ownerPhone || '-'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-slate-300">
-                          {item.ownerNationalId || '-'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={item.status} />
-                      </td>
-                    </tr>
-                  ))}
+                  {homologations.map((item) => {
+                    const availableActions = getAvailableActions(item.status);
+                    return (
+                      <tr
+                        key={item.id}
+                        onClick={() => router.push(`/admin/homologation/${item.id}`)}
+                        className="hover:bg-slate-800/50 transition-colors cursor-pointer"
+                      >
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-slate-300 font-medium">
+                            {item.ownerFullName || '-'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-slate-300">
+                            {item.trailerType || '-'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-slate-300">
+                            {item.ownerPhone || '-'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-slate-300">
+                            {item.ownerNationalId || '-'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <StatusBadge status={item.status} />
+                        </td>
+                        <td className="px-6 py-4">
+                          {availableActions.length > 0 ? (
+                            <div className="flex items-center gap-1">
+                              {availableActions.includes('approve') && (
+                                <button
+                                  onClick={(e) => handleActionClick(e, item.id, 'approve')}
+                                  className="p-2 text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-colors"
+                                  title="Aprobar"
+                                >
+                                  <FiCheck className="w-4 h-4" />
+                                </button>
+                              )}
+                              {availableActions.includes('reject') && (
+                                <button
+                                  onClick={(e) => handleActionClick(e, item.id, 'reject')}
+                                  className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                                  title="Rechazar"
+                                >
+                                  <FiX className="w-4 h-4" />
+                                </button>
+                              )}
+                              {availableActions.includes('incomplete') && (
+                                <button
+                                  onClick={(e) => handleActionClick(e, item.id, 'incomplete')}
+                                  className="p-2 text-orange-400 hover:bg-orange-500/20 rounded-lg transition-colors"
+                                  title="Marcar Incompleto"
+                                >
+                                  <FiAlertTriangle className="w-4 h-4" />
+                                </button>
+                              )}
+                              {availableActions.includes('complete') && (
+                                <button
+                                  onClick={(e) => handleActionClick(e, item.id, 'complete')}
+                                  className="p-2 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors"
+                                  title="Completar"
+                                >
+                                  <FiChevronRight className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-600 text-sm">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
             {/* Mobile Cards */}
             <div className="md:hidden divide-y divide-slate-800">
-              {homologations.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => router.push(`/admin/homologation/${item.id}`)}
-                  className="p-4 hover:bg-slate-800/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-sm text-slate-400">
-                      #{truncateId(item.id)}
-                    </span>
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-slate-300">
-                      <FiPhone className="w-4 h-4 text-slate-500" />
-                      <span>{item.ownerPhone || '-'}</span>
+              {homologations.map((item) => {
+                const availableActions = getAvailableActions(item.status);
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 hover:bg-slate-800/50 transition-colors"
+                  >
+                    <div
+                      onClick={() => router.push(`/admin/homologation/${item.id}`)}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm text-slate-300 font-medium">
+                          {item.ownerFullName || '-'}
+                        </span>
+                        <StatusBadge status={item.status} />
+                      </div>
+                      <div className="space-y-2">
+                        {item.trailerType && (
+                          <div className="flex items-center gap-2 text-sm text-slate-300">
+                            <FiTruck className="w-4 h-4 text-slate-500" />
+                            <span>{item.trailerType}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm text-slate-300">
+                          <FiPhone className="w-4 h-4 text-slate-500" />
+                          <span>{item.ownerPhone || '-'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-slate-300">
+                          <FiCreditCard className="w-4 h-4 text-slate-500" />
+                          <span>{item.ownerNationalId || '-'}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-300">
-                      <FiCreditCard className="w-4 h-4 text-slate-500" />
-                      <span>{item.ownerNationalId || '-'}</span>
-                    </div>
+                    {/* Mobile Action Buttons */}
+                    {availableActions.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-800">
+                        {availableActions.includes('approve') && (
+                          <button
+                            onClick={(e) => handleActionClick(e, item.id, 'approve')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-colors"
+                          >
+                            <FiCheck className="w-3.5 h-3.5" />
+                            Aprobar
+                          </button>
+                        )}
+                        {availableActions.includes('reject') && (
+                          <button
+                            onClick={(e) => handleActionClick(e, item.id, 'reject')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors"
+                          >
+                            <FiX className="w-3.5 h-3.5" />
+                            Rechazar
+                          </button>
+                        )}
+                        {availableActions.includes('incomplete') && (
+                          <button
+                            onClick={(e) => handleActionClick(e, item.id, 'incomplete')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-400 bg-orange-500/10 border border-orange-500/20 rounded-lg hover:bg-orange-500/20 transition-colors"
+                          >
+                            <FiAlertTriangle className="w-3.5 h-3.5" />
+                            Incompleto
+                          </button>
+                        )}
+                        {availableActions.includes('complete') && (
+                          <button
+                            onClick={(e) => handleActionClick(e, item.id, 'complete')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-lg hover:bg-purple-500/20 transition-colors"
+                          >
+                            <FiChevronRight className="w-3.5 h-3.5" />
+                            Completar
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
       </main>
+
+      {/* Status Change Modal */}
+      <StatusChangeModal
+        isOpen={statusModalOpen}
+        onClose={() => {
+          setStatusModalOpen(false);
+          setCurrentAction(null);
+          setSelectedHomologationId(null);
+        }}
+        action={currentAction}
+        onConfirm={handleStatusChange}
+        isLoading={statusActionLoading}
+      />
     </div>
   );
 }

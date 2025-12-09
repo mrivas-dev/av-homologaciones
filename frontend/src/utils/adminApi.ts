@@ -11,11 +11,27 @@ export interface Photo {
   createdAt: string;
 }
 
+export type AdminDocumentType = 'payment_receipt' | 'homologation_papers';
+
+export interface AdminDocument {
+  id: string;
+  homologationId: string;
+  documentType: AdminDocumentType;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  description: string | null;
+  createdBy: string;
+  createdAt: string;
+}
+
 export interface HomologationListItem {
   id: string;
   ownerPhone: string | null;
   ownerNationalId: string | null;
   ownerFullName: string | null;
+  trailerType: string | null;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -28,6 +44,7 @@ export interface HomologationDetail extends HomologationListItem {
   trailerLicensePlateNumber: string | null;
   ownerEmail: string | null;
   photos: Photo[];
+  documents: AdminDocument[];
   version: number;
 }
 
@@ -206,5 +223,63 @@ export async function deleteHomologation(
   );
 
   return handleResponse(response);
+}
+
+/**
+ * Upload a document for a homologation
+ */
+export async function uploadDocument(
+  token: string,
+  homologationId: string,
+  documentType: AdminDocumentType,
+  file: File,
+  description?: string
+): Promise<AdminDocument> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('homologationId', homologationId);
+  formData.append('documentType', documentType);
+  if (description) {
+    formData.append('description', description);
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/documents`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    }
+  );
+
+  return handleResponse<AdminDocument>(response);
+}
+
+/**
+ * Delete a document
+ */
+export async function deleteDocument(
+  token: string,
+  documentId: string
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/documents/${documentId}`,
+    {
+      method: 'DELETE',
+      headers: getAuthHeaders(token),
+    }
+  );
+
+  return handleResponse(response);
+}
+
+/**
+ * Get document URL from file path
+ */
+export function getDocumentUrl(filePath: string): string {
+  const fileName = filePath.split('/').pop() || filePath.split('\\').pop() || filePath;
+  return `${API_BASE_URL}/uploads/${fileName}`;
 }
 
