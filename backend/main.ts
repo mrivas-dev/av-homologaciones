@@ -8,6 +8,7 @@ import homologationRoutes from "./routes/homologation.routes.ts";
 import photoRoutes from "./routes/photo.routes.ts";
 import paymentRoutes from "./routes/payment.routes.ts";
 import adminRoutes from "./routes/admin.routes.ts";
+import documentRoutes from "./routes/document.routes.ts";
 
 // Initialize application
 const app = new Application();
@@ -93,6 +94,9 @@ app.use(paymentRoutes.allowedMethods());
 app.use(adminRoutes.routes());
 app.use(adminRoutes.allowedMethods());
 
+app.use(documentRoutes.routes());
+app.use(documentRoutes.allowedMethods());
+
 const PORT = parseInt(Deno.env.get("PORT") || "4000");
 
 console.log("✅ Deno backend running on http://localhost:" + PORT);
@@ -103,5 +107,6 @@ console.log("  - Homologations: /api/homologations");
 console.log("  - Photos: /api/photos");
 console.log("  - Payments: /api/payments");
 console.log("  - Admin: /api/admin/homologations");
+console.log("  - Admin Documents: /api/admin/documents");
 
 await app.listen({ port: PORT });

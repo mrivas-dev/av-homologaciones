@@ -2,6 +2,7 @@ import type { Context } from "../deps.ts";
 import { HomologationRepository } from "../repositories/homologationRepository.ts";
 import { HomologationService } from "../services/homologationService.ts";
 import { PhotoRepository } from "../repositories/photoRepository.ts";
+import { DocumentRepository } from "../repositories/documentRepository.ts";
 import { HomologationStatus } from "../types/homologation.types.ts";
 import type { AuthContext } from "../types/auth.types.ts";
 import { z } from "../deps.ts";
@@ -9,6 +10,7 @@ import { z } from "../deps.ts";
 const homologationRepository = new HomologationRepository();
 const homologationService = new HomologationService();
 const photoRepository = new PhotoRepository();
+const documentRepository = new DocumentRepository();
 
 const ApproveRejectSchema = z.object({
     reason: z.string().optional(),
@@ -66,13 +68,15 @@ export class AdminController {
                 return;
             }
 
-            // Fetch associated photos
+            // Fetch associated photos and documents
             const photos = await photoRepository.findByHomologationId(id);
+            const documents = await documentRepository.findByHomologationId(id);
 
             ctx.response.status = 200;
             ctx.response.body = {
                 ...homologation,
                 photos,
+                documents,
             };
         } catch (error) {
             console.error("Get homologation by ID error:", error);
