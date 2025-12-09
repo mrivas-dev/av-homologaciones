@@ -7,11 +7,16 @@ import {
   updateHomologation,
   createPayment,
   getPhotos,
+  getDocuments,
+  submitHomologation,
+  getDocumentUrl,
+  formatFileSize,
   Homologation,
   Photo,
+  AdminDocument,
   ApiError
 } from '../../../utils/api';
-import { FiCheck, FiLoader, FiAlertCircle, FiSave, FiCreditCard } from 'react-icons/fi';
+import { FiCheck, FiLoader, FiAlertCircle, FiSave, FiCreditCard, FiSend, FiTruck, FiUser, FiCamera, FiClock, FiCheckCircle, FiXCircle, FiFileText, FiDownload, FiEye } from 'react-icons/fi';
 import TrailerInfoForm, { TrailerFormData } from '../../../components/homologation/TrailerInfoForm';
 import OwnerInfoForm, { OwnerFormData } from '../../../components/homologation/OwnerInfoForm';
 import PhotoUpload from '../../../components/homologation/PhotoUpload';
@@ -592,15 +597,505 @@ function PaymentStep({
   );
 }
 
+// Status badge configuration
+const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
+  'Draft': { label: 'Borrador', color: 'text-amber-400', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/20' },
+  'Pending Review': { label: 'En Revisión', color: 'text-blue-400', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
+  'Payed': { label: 'Pagado', color: 'text-cyan-400', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/20' },
+  'Approved': { label: 'Aprobado', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/20' },
+  'Rejected': { label: 'Rechazado', color: 'text-red-400', bgColor: 'bg-red-500/10', borderColor: 'border-red-500/20' },
+  'Completed': { label: 'Completado', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/20' },
+  'Incomplete': { label: 'Incompleto', color: 'text-orange-400', bgColor: 'bg-orange-500/10', borderColor: 'border-orange-500/20' },
+};
+
 // Step 3: Review Content
-function ReviewStep() {
+function ReviewStep({
+  homologation,
+  photos,
+  requiredFieldsValidation,
+  onHomologationUpdate,
+  onGoToStep1,
+  onGoToStep2,
+}: {
+  homologation: Homologation;
+  photos: Photo[];
+  requiredFieldsValidation: RequiredFieldsValidation;
+  onHomologationUpdate: (data: Homologation) => void;
+  onGoToStep1: () => void;
+  onGoToStep2: () => void;
+}) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [documents, setDocuments] = useState<AdminDocument[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
+
+  const status = homologation.status || 'Draft';
+  const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG['Draft'];
+  const isDraft = status === 'Draft';
+  const isPaid = homologation.isPaid === true;
+  const hasPhotos = photos.length > 0;
+
+  // Fetch documents on mount
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      setLoadingDocuments(true);
+      setDocumentsError(null);
+      try {
+        const response = await getDocuments(homologation.id);
+        setDocuments(response.data);
+      } catch (err) {
+        const message = err instanceof ApiError ? err.message : 'Error al cargar documentos';
+        setDocumentsError(message);
+      } finally {
+        setLoadingDocuments(false);
+      }
+    };
+
+    fetchDocuments();
+  }, [homologation.id]);
+
+  // Check if all prerequisites are met for submission
+  const canSubmit = isDraft && 
+    requiredFieldsValidation.isComplete && 
+    hasPhotos && 
+    isPaid;
+
+  // Build warnings list
+  const warnings: { type: string; message: string; action: () => void; actionLabel: string }[] = [];
+  
+  if (isDraft) {
+    if (!requiredFieldsValidation.isComplete) {
+      warnings.push({
+        type: 'fields',
+        message: `Campos incompletos: ${requiredFieldsValidation.missingFields.join(', ')}`,
+        action: onGoToStep1,
+        actionLabel: 'Completar información',
+      });
+    }
+    if (!hasPhotos) {
+      warnings.push({
+        type: 'photos',
+        message: 'Debes subir al menos una foto del trailer',
+        action: onGoToStep1,
+        actionLabel: 'Subir fotos',
+      });
+    }
+    if (!isPaid) {
+      warnings.push({
+        type: 'payment',
+        message: 'El pago debe estar completado antes de enviar',
+        action: onGoToStep2,
+        actionLabel: 'Ir al pago',
+      });
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (isSubmitting || !canSubmit) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const updated = await submitHomologation(homologation.id);
+      onHomologationUpdate(updated);
+      setSubmitSuccess(true);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Error al enviar la solicitud';
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Render status-specific message for non-Draft states
+  const renderStatusMessage = () => {
+    if (isDraft) return null;
+
+    const messages: Record<string, { icon: React.ReactNode; title: string; description: string }> = {
+      'Pending Review': {
+        icon: <FiClock className="w-8 h-8 text-blue-400" />,
+        title: 'Tu solicitud está siendo revisada',
+        description: 'Nuestro equipo está revisando tu documentación. Te notificaremos cuando haya novedades.',
+      },
+      'Payed': {
+        icon: <FiCreditCard className="w-8 h-8 text-cyan-400" />,
+        title: 'Pago recibido',
+        description: 'Tu pago ha sido procesado. Tu solicitud será revisada pronto.',
+      },
+      'Approved': {
+        icon: <FiCheckCircle className="w-8 h-8 text-emerald-400" />,
+        title: '¡Felicitaciones! Tu homologación ha sido aprobada',
+        description: 'Tu trailer cumple con todos los requisitos. Puedes descargar tu certificado.',
+      },
+      'Rejected': {
+        icon: <FiXCircle className="w-8 h-8 text-red-400" />,
+        title: 'Solicitud rechazada',
+        description: homologation.rejectionReason || 'Tu solicitud no cumple con los requisitos necesarios.',
+      },
+      'Completed': {
+        icon: <FiCheckCircle className="w-8 h-8 text-emerald-400" />,
+        title: 'Proceso completado',
+        description: 'Tu homologación ha sido completada exitosamente.',
+      },
+      'Incomplete': {
+        icon: <FiAlertCircle className="w-8 h-8 text-orange-400" />,
+        title: 'Información incompleta',
+        description: 'Se requiere información adicional para continuar con tu solicitud.',
+      },
+    };
+
+    const msg = messages[status];
+    if (!msg) return null;
+
+    return (
+      <div className={`p-6 rounded-xl ${statusConfig.bgColor} border ${statusConfig.borderColor}`}>
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">{msg.icon}</div>
+          <div>
+            <h4 className={`text-lg font-semibold ${statusConfig.color} mb-1`}>{msg.title}</h4>
+            <p className="text-slate-400">{msg.description}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="animate-in">
-      <div className="flex items-center justify-center min-h-[300px]">
-        <div className="text-center">
-          <h3 className="text-2xl font-semibold text-white mb-2">Revisión</h3>
-          <p className="text-slate-400">Próximamente</p>
+      <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 max-w-3xl mx-auto space-y-6">
+        {/* Header with Status */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+          <h3 className="text-xl font-semibold text-white">Revisión Final</h3>
+          <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.color} border ${statusConfig.borderColor}`}>
+            {statusConfig.label}
+          </div>
         </div>
+
+        {/* Status Message for non-Draft */}
+        {renderStatusMessage()}
+
+        {/* Summary Section */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-slate-400 uppercase tracking-wider">
+            Resumen de la Solicitud
+          </h4>
+
+          {/* Trailer Info */}
+          <div className="bg-slate-800/50 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <FiTruck className="w-5 h-5 text-amber-400" />
+              <span className="font-medium text-white">Información del Trailer</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-slate-500">Tipo:</span>
+                <span className="ml-2 text-slate-300">{homologation.trailerType || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500">Patente:</span>
+                <span className="ml-2 text-slate-300">{homologation.trailerLicensePlateNumber || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500">Dimensiones:</span>
+                <span className="ml-2 text-slate-300">{homologation.trailerDimensions || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500">Ejes:</span>
+                <span className="ml-2 text-slate-300">{homologation.trailerNumberOfAxles || '—'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Owner Info */}
+          <div className="bg-slate-800/50 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <FiUser className="w-5 h-5 text-amber-400" />
+              <span className="font-medium text-white">Información del Propietario</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-slate-500">Nombre:</span>
+                <span className="ml-2 text-slate-300">{homologation.ownerFullName || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500">DNI/CUIT:</span>
+                <span className="ml-2 text-slate-300">{homologation.ownerNationalId || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500">Email:</span>
+                <span className="ml-2 text-slate-300">{homologation.ownerEmail || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500">Teléfono:</span>
+                <span className="ml-2 text-slate-300">{homologation.ownerPhone || '—'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Documentation & Payment */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Photos */}
+            <div className="bg-slate-800/50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <FiCamera className="w-5 h-5 text-amber-400" />
+                <span className="font-medium text-white">Fotos</span>
+              </div>
+              <p className="text-sm text-slate-300">
+                {photos.length} de 6 fotos subidas
+              </p>
+              {!hasPhotos && (
+                <p className="text-xs text-red-400 mt-1">Mínimo 1 foto requerida</p>
+              )}
+            </div>
+
+            {/* Payment */}
+            <div className="bg-slate-800/50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <FiCreditCard className="w-5 h-5 text-amber-400" />
+                <span className="font-medium text-white">Pago</span>
+              </div>
+              {isPaid ? (
+                <div className="flex items-center gap-1.5 text-sm text-emerald-400">
+                  <FiCheck className="w-4 h-4" />
+                  <span>Completado</span>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">Pendiente</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Documents Section */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-slate-400 uppercase tracking-wider">
+            Documentos Adjuntos
+          </h4>
+
+          {loadingDocuments ? (
+            <div className="flex items-center justify-center py-8">
+              <FiLoader className="w-6 h-6 text-amber-400 animate-spin" />
+            </div>
+          ) : documentsError ? (
+            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3">
+              <FiAlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-sm text-red-400">{documentsError}</p>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="p-6 rounded-lg bg-slate-800/50 border border-slate-700 text-center">
+              <FiFileText className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">No hay documentos adjuntos aún</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Payment Receipts */}
+              {documents.filter(doc => doc.documentType === 'payment_receipt').length > 0 && (
+                <div className="bg-slate-800/50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FiCreditCard className="w-5 h-5 text-amber-400" />
+                    <span className="font-medium text-white">Comprobantes de Pago</span>
+                  </div>
+                  <div className="space-y-2">
+                    {documents
+                      .filter(doc => doc.documentType === 'payment_receipt')
+                      .map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg border border-slate-700"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <FiFileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white truncate">
+                                {doc.fileName}
+                              </p>
+                              <div className="flex items-center gap-3 mt-1">
+                                <p className="text-xs text-slate-500">
+                                  {formatFileSize(doc.fileSize)}
+                                </p>
+                                <span className="text-xs text-slate-600">•</span>
+                                <p className="text-xs text-slate-500">
+                                  {new Date(doc.createdAt).toLocaleDateString('es-AR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            <a
+                              href={getDocumentUrl(doc)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+                              title="Ver documento"
+                            >
+                              <FiEye className="w-4 h-4" />
+                            </a>
+                            <a
+                              href={getDocumentUrl(doc)}
+                              download={doc.fileName}
+                              className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+                              title="Descargar documento"
+                            >
+                              <FiDownload className="w-4 h-4" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Homologation Papers */}
+              {documents.filter(doc => doc.documentType === 'homologation_papers').length > 0 && (
+                <div className="bg-slate-800/50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FiFileText className="w-5 h-5 text-amber-400" />
+                    <span className="font-medium text-white">Documentos de Homologación</span>
+                  </div>
+                  <div className="space-y-2">
+                    {documents
+                      .filter(doc => doc.documentType === 'homologation_papers')
+                      .map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg border border-slate-700"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <FiFileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white truncate">
+                                {doc.fileName}
+                              </p>
+                              {doc.description && (
+                                <p className="text-xs text-slate-400 mt-1">{doc.description}</p>
+                              )}
+                              <div className="flex items-center gap-3 mt-1">
+                                <p className="text-xs text-slate-500">
+                                  {formatFileSize(doc.fileSize)}
+                                </p>
+                                <span className="text-xs text-slate-600">•</span>
+                                <p className="text-xs text-slate-500">
+                                  {new Date(doc.createdAt).toLocaleDateString('es-AR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            <a
+                              href={getDocumentUrl(doc)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+                              title="Ver documento"
+                            >
+                              <FiEye className="w-4 h-4" />
+                            </a>
+                            <a
+                              href={getDocumentUrl(doc)}
+                              download={doc.fileName}
+                              className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+                              title="Descargar documento"
+                            >
+                              <FiDownload className="w-4 h-4" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Warnings */}
+        {isDraft && warnings.length > 0 && (
+          <div className="space-y-3">
+            {warnings.map((warning, index) => (
+              <div
+                key={index}
+                className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <FiAlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-amber-200">{warning.message}</p>
+                  </div>
+                  <button
+                    onClick={warning.action}
+                    className="text-sm font-medium text-amber-400 hover:text-amber-300 whitespace-nowrap"
+                  >
+                    {warning.actionLabel} →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Submit Error */}
+        {submitError && (
+          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3">
+            <FiAlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <p className="text-sm text-red-400">{submitError}</p>
+          </div>
+        )}
+
+        {/* Submit Success */}
+        {submitSuccess && (
+          <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
+            <FiCheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <p className="text-sm text-emerald-400">
+              ¡Tu solicitud ha sido enviada! Nuestro equipo la revisará pronto.
+            </p>
+          </div>
+        )}
+
+        {/* Submit Button - Only for Draft status */}
+        {isDraft && !submitSuccess && (
+          <div className="pt-4 border-t border-slate-800">
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting || !canSubmit}
+              className={`
+                w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg
+                font-semibold text-white transition-all duration-200
+                ${isSubmitting || !canSubmit
+                  ? 'bg-slate-700 cursor-not-allowed opacity-50'
+                  : 'bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30'
+                }
+              `}
+            >
+              {isSubmitting ? (
+                <>
+                  <FiLoader className="w-5 h-5 animate-spin" />
+                  <span>Enviando...</span>
+                </>
+              ) : (
+                <>
+                  <FiSend className="w-5 h-5" />
+                  <span>Enviar para Revisión</span>
+                </>
+              )}
+            </button>
+            {canSubmit && (
+              <p className="text-xs text-slate-500 text-center mt-3">
+                Una vez enviado, no podrás modificar la información
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -741,7 +1236,16 @@ export default function HomologationTrackingPage() {
           />
         );
       case 3:
-        return <ReviewStep />;
+        return (
+          <ReviewStep
+            homologation={homologation}
+            photos={photos}
+            requiredFieldsValidation={requiredFieldsValidation}
+            onHomologationUpdate={handleHomologationUpdate}
+            onGoToStep1={handleGoToStep1}
+            onGoToStep2={() => setCurrentStep(2)}
+          />
+        );
       default:
         return null;
     }

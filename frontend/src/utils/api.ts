@@ -339,6 +339,73 @@ export async function deletePhoto(id: string): Promise<void> {
 }
 
 // ============================================================================
+// Document API
+// ============================================================================
+
+export interface AdminDocument {
+  id: string;
+  homologationId: string;
+  documentType: 'payment_receipt' | 'homologation_papers';
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  description?: string | null;
+  createdAt: string;
+}
+
+export interface DocumentsResponse {
+  data: AdminDocument[];
+  total: number;
+}
+
+/**
+ * Get documents for a homologation (public endpoint)
+ */
+export async function getDocuments(homologationId: string): Promise<DocumentsResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/documents/homologation/${homologationId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || 'Failed to fetch documents',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+
+  return data as DocumentsResponse;
+}
+
+/**
+ * Get document file URL
+ */
+export function getDocumentUrl(document: AdminDocument): string {
+  // The filePath is like ./uploads/doc_payment_receipt_uuid_timestamp.pdf
+  // We need to serve it from the backend
+  const fileName = document.filePath.split('/').pop();
+  return `${API_BASE_URL}/uploads/${fileName}`;
+}
+
+/**
+ * Format file size for display
+ */
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// ============================================================================
 // Payment API
 // ============================================================================
 
