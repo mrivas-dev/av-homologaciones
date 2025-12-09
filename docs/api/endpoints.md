@@ -492,6 +492,53 @@ GET /api/payments/:id/receipt
 
 ---
 
+## Document Endpoints
+
+### List Documents by Homologation (Public)
+
+Get all documents attached by admins for a homologation. This endpoint is public and allows users to view documents for their own homologations.
+
+#### Request
+```
+GET /api/documents/homologation/:homologationId
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "homologationId": "uuid",
+      "documentType": "payment_receipt",
+      "fileName": "recibo_2024.pdf",
+      "filePath": "./uploads/doc_payment_receipt_uuid_1234567890.pdf",
+      "fileSize": 245760,
+      "mimeType": "application/pdf",
+      "description": "Comprobante de pago MercadoPago",
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+**Document Types:**
+- `payment_receipt`: Payment receipts/comprobantes
+- `homologation_papers`: Homologation certificates and official documents
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "Homologation not found"
+}
+```
+
+**Note:** Documents are served via the `/uploads/:fileName` endpoint (same as photos). The frontend should extract the filename from `filePath` and construct the URL as: `${API_BASE_URL}/uploads/${fileName}`
+
+---
+
 ## Admin Endpoints
 
 All admin endpoints require authentication with admin role.

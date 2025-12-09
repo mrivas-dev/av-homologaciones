@@ -365,6 +365,7 @@ export async function deletePhoto(
 
 - [Homologation Tracking Page](./homologation-tracking-page.md)
 - [Photo Examples Plan](./photo-examples-plan.md) - Implementation details for reference photos (trailer-type-based)
+- [Review Step Plan](./review-step-plan.md) - Implementation details for Step 3 submit functionality
 - [API Endpoints](../api/endpoints.md)
 - [Database Schema](../backend/database-schema.md)
 

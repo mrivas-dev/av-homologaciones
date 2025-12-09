@@ -125,7 +125,68 @@ Payment step with MercadoPago integration (initial implementation):
 - Full MercadoPago integration coming soon
 
 #### Step 3: Revisión
-Placeholder for review functionality (coming soon)
+
+Review and submission step for homologations in Draft status:
+
+**Features:**
+- Summary display showing all homologation data:
+  - Trailer info (type, dimensions, axles, license plate)
+  - Owner info (name, email, DNI, phone)
+  - Photo count
+  - Payment status
+- Status-based content:
+  - **Draft**: Shows submit button (if all prerequisites met)
+  - **Pending Review**: Shows "awaiting review" message
+  - **Approved/Rejected/Completed**: Shows final status message
+
+**Prerequisites for Submission:**
+- All required fields must be filled:
+  - Trailer type, dimensions, axles, license plate
+  - Owner full name, national ID, phone, email
+- At least one photo uploaded
+- Payment completed (`isPaid === true`)
+
+**Note:** The backend API (`POST /api/homologations/:id/submit`) also validates these prerequisites and will return specific error messages if any are missing.
+
+**Submit Flow:**
+1. User clicks "Enviar para Revisión" button
+2. System validates prerequisites
+3. Calls `POST /api/homologations/:id/submit`
+4. Status changes from "Draft" to "Pending Review"
+5. Success message shown, button hidden
+
+**Warnings Display:**
+- Missing fields: Lists required fields, link to Step 1
+- No photos: Warning with link to Step 1
+- Payment incomplete: Warning with link to Step 2
+
+**Documents Section:**
+- Displays documents attached by admins
+- Grouped by type:
+  - **Comprobantes de Pago** (Payment Receipts)
+  - **Documentos de Homologación** (Homologation Papers)
+- Each document shows:
+  - File name
+  - File size (formatted: KB/MB)
+  - Upload date (DD/MM/YYYY)
+  - Description (if available)
+- Actions available:
+  - View (opens in new tab)
+  - Download
+- Empty state: "No hay documentos adjuntos aún"
+- Loading state: Spinner while fetching
+- Error state: Error message if fetch fails
+
+**Status Badge Colors:**
+| Status | Color | Label |
+|--------|-------|-------|
+| Draft | Amber | Borrador |
+| Pending Review | Blue | En Revisión |
+| Payed | Cyan | Pagado |
+| Approved | Green | Aprobado |
+| Rejected | Red | Rechazado |
+| Completed | Green | Completado |
+| Incomplete | Orange | Incompleto |
 
 ### Status Values
 
@@ -215,7 +276,14 @@ HomologationTrackingPage
 ├── PaymentStep                # Step 2 content
 │   ├── Price display          # Varies by trailer type (Trailer: $1, Rolling Box: $2, Motorhome: $3)
 │   └── MercadoPago button     # Payment button with logo
-└── ReviewStep                 # Step 3 content (placeholder)
+└── ReviewStep                 # Step 3 content
+    ├── Status badge           # Current homologation status
+    ├── Summary section        # Trailer, owner, photos, payment info
+    ├── Documents section      # Admin-attached documents (receipts, certificates)
+    │   ├── Payment receipts   # Grouped by type
+    │   └── Homologation papers # Grouped by type
+    ├── Prerequisites warnings # Missing fields, photos, or payment
+    └── Submit button          # "Enviar para Revisión" (Draft only)
 ```
 
 ### State Management
@@ -371,6 +439,89 @@ Update homologation status (used for payment)
 }
 ```
 
+#### GET /api/documents/homologation/:homologationId
+Get documents attached by admins for a homologation (public endpoint)
+
+**Request:**
+```
+GET /api/documents/homologation/:homologationId
+```
+
+**Response:**
+**Success (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "homologationId": "uuid",
+      "documentType": "payment_receipt",
+      "fileName": "recibo_2024.pdf",
+      "filePath": "./uploads/doc_payment_receipt_uuid_1234567890.pdf",
+      "fileSize": 245760,
+      "mimeType": "application/pdf",
+      "description": "Comprobante de pago MercadoPago",
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+**Error (404 Not Found)**
+```json
+{
+  "error": "Homologation not found"
+}
+```
+
+**Note:** Documents are served via `/uploads/:fileName` endpoint (same as photos).
+
+#### POST /api/homologations/:id/submit
+Submit homologation for review (changes status from Draft to Pending Review)
+
+**Request:**
+```
+POST /api/homologations/:id/submit
+```
+
+**Prerequisites:**
+- Status must be "Draft"
+- Required fields must be filled:
+  - `ownerFullName`
+  - `ownerNationalId`
+  - `ownerPhone`
+  - `ownerEmail`
+  - `trailerType`
+- At least one photo uploaded
+
+**Response:**
+**Success (200 OK)**
+```json
+{
+  "id": "homologation-uuid",
+  "status": "Pending Review",
+  "updatedAt": "2024-01-15T10:30:00Z",
+  ...
+}
+```
+
+**Error (400 Bad Request) - Missing Fields**
+```json
+{
+  "error": "Missing required fields for submission: trailerType",
+  "code": "MISSING_FIELDS"
+}
+```
+
+**Error (400 Bad Request) - Invalid Status**
+```json
+{
+  "error": "Cannot submit homologation with status: Pending Review",
+  "code": "INVALID_STATUS"
+}
+```
+
 ### Component States
 
 1. **Loading:** Shows spinner while fetching data
@@ -425,7 +576,7 @@ Planned features for future phases:
 - [x] Photo deletion functionality
 - [x] Reference photos section (trailer-type-based: Trailer, Rolling Box, or Motorhome)
 - [x] Form validation
-- [x] API integration (updateHomologation, uploadPhoto, getPhotos, deletePhoto)
+- [x] API integration (updateHomologation, uploadPhoto, getPhotos, deletePhoto, getDocuments)
 - [x] Auto-save functionality on step navigation
 - [x] Manual save button
 - [x] Change tracking and visual feedback
@@ -441,7 +592,13 @@ Planned features for future phases:
 - [ ] Payment webhook handling
 - [ ] Invoice/receipt generation
 
-### Step 3: Revisión
+### Step 3: Revisión (✅ Completed)
+- [x] Submit for review button (Draft status only)
+- [x] Prerequisites validation (fields, photos, payment)
+- [x] Status-based content display
+- [x] Summary of homologation data (trailer, owner, photos, payment)
+- [x] Warnings with navigation links to fix issues
+- [x] Status badge with color coding
 - [ ] Document preview
 - [ ] Status timeline
 - [ ] Admin comments display
@@ -469,6 +626,7 @@ Planned features for future phases:
 
 - [Step 1 Form Plan](./step1-form-plan.md) - Detailed implementation plan for Step 1
 - [Photo Examples Plan](./photo-examples-plan.md) - Example photos feature
+- [Review Step Plan](./review-step-plan.md) - Implementation plan for Step 3 submit functionality
 - [Homologation Overview](../backend/homologation-overview.md)
 - [API Endpoints](../api/endpoints.md)
 - [Landing Page Plan](./landing-page-plan.md)
