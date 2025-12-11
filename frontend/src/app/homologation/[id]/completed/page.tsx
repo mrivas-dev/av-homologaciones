@@ -31,6 +31,7 @@ import {
   FiFileText,
   FiDownload,
   FiExternalLink,
+  FiXCircle,
 } from 'react-icons/fi';
 
 export default function CompletedHomologationPage() {
