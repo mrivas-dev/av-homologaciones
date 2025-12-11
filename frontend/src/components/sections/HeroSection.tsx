@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaCar, FaCheckCircle, FaArrowRight, FaSpinner } from 'react-icons/fa';
-import Link from 'next/link';
+import { FaCheckCircle, FaArrowRight, FaSpinner } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 import { lookupOrCreateHomologation, type LookupOrCreateResponse, ApiError } from '../../utils/api';
+import { Button } from '../ui/Button';
 
 // Import the VideoBackground component with no SSR
 const VideoBackground = dynamic(
@@ -19,6 +19,13 @@ export default function HeroSection() {
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,11 +64,6 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left column - Content */}
           <div className="text-center lg:text-left">
-            <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white/10 backdrop-blur-sm mb-6">
-              <FaCar className="mr-2" />
-              <span>Líderes en homologación vehicular</span>
-            </div>
-            
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
               Homologación de vehículos <span className="text-secondary-light">rápida y segura</span>
             </h1>
@@ -72,13 +74,22 @@ export default function HeroSection() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link href="#contacto" className="btn btn-secondary">
+              <Button
+                variant="secondary"
+                size="lg"
+                rightIcon={<FaArrowRight />}
+                onClick={() => scrollToSection('contacto')}
+              >
                 Solicitar presupuesto
-                <FaArrowRight className="ml-2" />
-              </Link>
-              <Link href="#proceso" className="btn btn-outline text-white border-white/20 hover:bg-white/10">
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-white border-white/20 hover:bg-white/10"
+                onClick={() => scrollToSection('proceso')}
+              >
                 Conocer el proceso
-              </Link>
+              </Button>
             </div>
             
             <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-4 text-sm">

@@ -12,14 +12,14 @@
 - `Layout.tsx` - Main layout wrapper with header and footer (imported from components/layout)
 - `components/layout/Layout.tsx` - Main layout implementation
 - `components/layout/Header.tsx` - Navigation bar with logo and menu
-- `components/layout/Footer.tsx` - Site footer with contact information
+- `components/layout/Footer.tsx` - Footer with navigation anchors and contact info
 
 ### 3. Page Sections (Dynamically Imported)
 - `sections/HeroSection.tsx` - Full-width hero with CTA form (section id: "inicio")
 - `sections/WhatIsSection.tsx` - "¿Qué es la homologación?" section (section id: "que-es")
 - `sections/WhySection.tsx` - "¿Por qué homologar?" with feature cards (section id: "por-que")
-- `sections/ProcessSection.tsx` - Process visualization (section id: "proceso")
-- `sections/CTASection.tsx` - Call to action banner (section id: "contacto")
+- `sections/ProcessSection.tsx` - 4-step process cards with icons (section id: "proceso")
+- `sections/CTASection.tsx` - CTA banner with phone/mail buttons and SLA info (section id: "contacto")
 
 ### 3. Shared Components
 - `Button.tsx` - Reusable button component
@@ -76,6 +76,9 @@ src/
 - [x] Section organization with semantic HTML5
 - [x] Smooth scrolling between sections
 - [x] Responsive design implementation
+- [x] Process cards with clear steps and icons
+- [x] CTA banner with contact channels
+- [x] Footer navigation + contact details
 
 #### In Progress / Pending
 - [ ] Language selector functionality
