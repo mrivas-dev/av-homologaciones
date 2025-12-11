@@ -117,10 +117,12 @@ useEffect(() => {
 **Features:**
 - Protected route (requires authentication)
 - Header with user info and logout button
+- Brand block in header links back to the public homepage
 - Homologations list table with **status change actions**
 - Status badges with color coding
 - Mobile-responsive card layout with action buttons
 - Refresh functionality
+- Quick link to **Completed** homologations view
 - Loading and empty states
 - **Clickable rows** - Navigate to detail page on click
 - **Quick status actions** - Change status directly from the list
@@ -150,7 +152,7 @@ useEffect(() => {
 
 | Current Status | Available Quick Actions |
 |---------------|------------------------|
-| Pending Review | Mark Incomplete (⚠), Reject (✗) |
+| Pending Review | Approve (✓), Mark Incomplete (⚠), Reject (✗) |
 | Payed | Approve (✓), Mark Incomplete (⚠), Reject (✗) |
 | Incomplete | Reject (✗) |
 | Approved | Complete (→) |
@@ -178,6 +180,7 @@ useEffect(() => {
 ### Homologation Detail Page (`/admin/homologation/[id]`)
 
 **Features:**
+- **Public site link** - Header includes a logo button to return to the homepage
 - **Full homologation details** - Complete information display
 - **Owner information card** - Name, DNI/CUIT, phone, email
 - **Trailer information card** - Type, dimensions, axles, license plate
@@ -206,7 +209,7 @@ Actions are dynamically shown based on the current status and valid status trans
 
 | Current Status | Available Actions |
 |----------------|-------------------|
-| Pending Review | Mark Incomplete, Reject |
+| Pending Review | Approve, Mark Incomplete, Reject |
 | Payed | Approve, Mark Incomplete, Reject |
 | Incomplete | Reject |
 | Approved | Complete |
@@ -239,6 +242,26 @@ Actions are dynamically shown based on the current status and valid status trans
 3. Confirm deletion
 4. Homologation is soft-deleted
 5. Redirect to dashboard list view
+
+### Completed Homologations Page (`/admin/completed`)
+
+**Purpose:** Dedicated view to audit homologaciones with status **Completed**, showing a concise
+summary for each closed process.
+
+**Data Source:**
+- Uses `fetchHomologations(token, 'Completed')` to pull the list
+- For each item, calls `fetchHomologationDetails` to populate photos and documents
+
+**Features:**
+- Purple "Completado" badge and quick stats (count, total photos)
+- Owner summary: name, DNI/CUIT, phone, email
+- Trailer summary: patent, dimensions, axles, type
+- Photos preview grid (up to 4 thumbnails) with "+N más" indicator
+- Payment section with receipt link when `payment_receipt` exists
+- Documents list for other attachments with download links
+- Metadata: created date, updated date, version
+- CTA to open full detail view (`/admin/homologation/[id]`)
+- Refresh + retry handling, loading, and empty states
 
 ## API Utilities (`adminApi.ts`)
 

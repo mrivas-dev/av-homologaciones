@@ -12,6 +12,18 @@ The Homologation Tracking Page allows users to view and follow the status of the
 
 Where `[id]` is the UUID of the homologation.
 
+### Completed Summary View
+
+```
+/homologation/[id]/completed
+```
+
+Read-only page shown when the homologation is **Completed**. Presents a concise summary, photo
+previews, payment receipt (if available), and attached documents with download links.
+
+**Auto-redirect:** When a homologation reaches status **Completed**, requests to
+`/homologation/[id]` automatically redirect the user to `/homologation/[id]/completed`.
+
 ## Access Control
 
 - **Authentication Required:** No
