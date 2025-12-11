@@ -16,6 +16,7 @@ const STATUS_TRANSITIONS: Record<string, string[]> = {
   ],
   [HomologationStatus.PENDING_REVIEW]: [
     HomologationStatus.PAYED,
+    HomologationStatus.APPROVED,
     HomologationStatus.INCOMPLETE,
     HomologationStatus.REJECTED,
   ],
