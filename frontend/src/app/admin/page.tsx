@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -24,6 +25,7 @@ import {
   FiCreditCard,
   FiTruck,
   FiCheck,
+  FiCheckCircle,
   FiX,
   FiAlertTriangle,
   FiChevronRight,
@@ -196,15 +198,19 @@ export default function AdminDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <Link 
+              href="/" 
+              className="group flex items-center gap-3 rounded-lg px-2 py-1 -ml-2 hover:bg-slate-800 transition-colors"
+              aria-label="Ir al sitio público"
+            >
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/30">
                 <span className="text-sm font-bold text-white font-heading">AV</span>
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-white font-heading">Admin Panel</h1>
-                <p className="text-xs text-slate-400">AV Homologación</p>
+                <h1 className="text-lg font-semibold text-white font-heading leading-tight">Admin Panel</h1>
+                <p className="text-xs text-slate-400">Volver al inicio</p>
               </div>
-            </div>
+            </Link>
 
             {/* User Menu */}
             <div className="flex items-center gap-4">
@@ -234,14 +240,23 @@ export default function AdminDashboardPage() {
               {homologations.length} {homologations.length === 1 ? 'registro' : 'registros'} encontrados
             </p>
           </div>
-          <button
-            onClick={loadHomologations}
-            disabled={isLoading}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors disabled:opacity-50"
-          >
-            <FiRefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Actualizar</span>
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => router.push('/admin/completed')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors"
+            >
+              <FiCheckCircle className="w-4 h-4" />
+              <span>Ver Completadas</span>
+            </button>
+            <button
+              onClick={loadHomologations}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <FiRefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>Actualizar</span>
+            </button>
+          </div>
         </div>
 
         {/* Error Message */}

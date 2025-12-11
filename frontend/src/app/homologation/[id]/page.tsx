@@ -1130,6 +1130,11 @@ export default function HomologationTrackingPage() {
         getPhotos(id),
       ]);
 
+      if (homologationData.status === 'Completed') {
+        router.replace(`/homologation/${homologationData.id}/completed`);
+        return;
+      }
+
       setHomologation(homologationData);
       setPhotos(photosData.data);
     } catch (err) {

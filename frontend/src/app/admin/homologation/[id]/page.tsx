@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -316,13 +317,25 @@ export default function AdminHomologationDetailPage() {
                 <p className="text-xs text-slate-400">Detalles completos</p>
               </div>
             </div>
-            <button
-              onClick={() => setDeleteModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg transition-colors"
-            >
-              <FiTrash2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Eliminar</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/"
+                className="hidden sm:flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                aria-label="Ir al sitio público"
+              >
+                <div className="w-8 h-8 rounded-md bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                  <span className="text-xs font-bold text-white font-heading">AV</span>
+                </div>
+                <span className="text-sm font-medium">Inicio</span>
+              </Link>
+              <button
+                onClick={() => setDeleteModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg transition-colors"
+              >
+                <FiTrash2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Eliminar</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>

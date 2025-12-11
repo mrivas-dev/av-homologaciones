@@ -121,7 +121,7 @@ export default function StatusChangeModal({
 export function getAvailableActions(status: string): StatusAction[] {
   switch (status) {
     case 'Pending Review':
-      return ['incomplete', 'reject'];
+      return ['approve', 'incomplete', 'reject'];
     case 'Payed':
       return ['approve', 'incomplete', 'reject'];
     case 'Incomplete':
