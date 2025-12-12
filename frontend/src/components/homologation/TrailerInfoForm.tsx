@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FiTruck, FiMaximize, FiHash, FiCreditCard, FiLock } from 'react-icons/fi';
+import { FiTruck, FiMaximize, FiHash, FiCreditCard, FiLock, FiLoader } from 'react-icons/fi';
+import { PublicTrailerType } from '@/utils/api';
 
-// Trailer types matching backend enum
-const TRAILER_TYPES = [
+// Fallback trailer types (used when API is unavailable)
+const FALLBACK_TRAILER_TYPES = [
   { value: 'Trailer', label: 'Trailer' },
   { value: 'Rolling Box', label: 'Rolling Box' },
   { value: 'Motorhome', label: 'Motorhome' },
@@ -23,6 +24,8 @@ interface TrailerInfoFormProps {
   errors?: Partial<Record<keyof TrailerFormData, string>>;
   disabled?: boolean;
   isLocked?: boolean;
+  trailerTypes?: PublicTrailerType[];
+  trailerTypesLoading?: boolean;
 }
 
 interface DimensionValues {
@@ -78,7 +81,13 @@ export default function TrailerInfoForm({
   errors = {},
   disabled = false,
   isLocked = false,
+  trailerTypes,
+  trailerTypesLoading = false,
 }: TrailerInfoFormProps) {
+  // Use API trailer types or fallback
+  const typeOptions = trailerTypes && trailerTypes.length > 0
+    ? trailerTypes.map(t => ({ value: t.name, label: t.name }))
+    : FALLBACK_TRAILER_TYPES;
   const [formData, setFormData] = useState<TrailerFormData>(initialData);
   const [dimensions, setDimensions] = useState<DimensionValues>(
     parseDimensions(initialData.trailerDimensions)
@@ -142,7 +151,7 @@ export default function TrailerInfoForm({
             <select
               value={formData.trailerType}
               onChange={(e) => handleChange('trailerType', e.target.value)}
-              disabled={disabled}
+              disabled={disabled || trailerTypesLoading}
               className={`
                 w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white
                 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500
@@ -151,17 +160,23 @@ export default function TrailerInfoForm({
                 ${errors.trailerType ? 'border-red-500' : 'border-slate-700'}
               `}
             >
-              <option value="">Seleccionar tipo...</option>
-              {TRAILER_TYPES.map((type) => (
+              <option value="">
+                {trailerTypesLoading ? 'Cargando tipos...' : 'Seleccionar tipo...'}
+              </option>
+              {typeOptions.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label}
                 </option>
               ))}
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              {trailerTypesLoading ? (
+                <FiLoader className="w-5 h-5 text-slate-400 animate-spin" />
+              ) : (
+                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
             </div>
           </div>
           {errors.trailerType && (

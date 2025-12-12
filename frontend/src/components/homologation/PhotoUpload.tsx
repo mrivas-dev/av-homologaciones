@@ -2,12 +2,34 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { FiCamera, FiUpload, FiX, FiLoader, FiAlertCircle, FiImage, FiTrash2, FiLock } from 'react-icons/fi';
-import { Photo, uploadPhoto, getPhotoUrl, deletePhoto } from '../../utils/api';
+import { Photo, uploadPhoto, getPhotoUrl, deletePhoto, ReferencePhoto } from '../../utils/api';
 
 const MAX_PHOTOS = 6;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'application/pdf'];
 const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'pdf'];
+
+// Fallback reference photos when API data is not available
+const FALLBACK_REFERENCE_PHOTOS: Record<string, ReferencePhoto[]> = {
+  'Trailer': [
+    { label: 'Frontal', path: '/reference_photos/trailer/frontal.jpeg' },
+    { label: 'Lateral', path: '/reference_photos/trailer/lateral.jpeg' },
+    { label: 'Trasera', path: '/reference_photos/trailer/trasera.jpeg' },
+    { label: 'Ficha eléctrica', path: '/reference_photos/ficha_electrica.jpeg' },
+  ],
+  'Rolling Box': [
+    { label: 'Frontal', path: '/reference_photos/rollingbox/frontal.jpeg' },
+    { label: 'Lateral', path: '/reference_photos/rollingbox/lateral.jpeg' },
+    { label: 'Trasera', path: '/reference_photos/rollingbox/trasera.jpeg' },
+    { label: 'Rueda de auxilio', path: '/reference_photos/rollingbox/rueda_auxilio.jpeg' },
+    { label: 'Ficha eléctrica', path: '/reference_photos/ficha_electrica.jpeg' },
+  ],
+  'Motorhome': [
+    { label: 'Frontal', path: '/ejemplo_trailer_frontal.jpg' },
+    { label: 'Lateral', path: '/ejemplo_trailer_lateral.jpg' },
+    { label: 'Chasis', path: '/ejemplo_trailer_chasis.jpg' },
+  ],
+};
 
 interface UploadingFile {
   id: string;
@@ -23,6 +45,7 @@ interface PhotoUploadProps {
   disabled?: boolean;
   isLocked?: boolean;
   trailerType?: string;
+  referencePhotos?: ReferencePhoto[];
 }
 
 export default function PhotoUpload({
@@ -32,7 +55,12 @@ export default function PhotoUpload({
   disabled = false,
   isLocked = false,
   trailerType,
+  referencePhotos,
 }: PhotoUploadProps) {
+  // Use API reference photos or fallback
+  const effectiveReferencePhotos = referencePhotos && referencePhotos.length > 0
+    ? referencePhotos
+    : (trailerType && FALLBACK_REFERENCE_PHOTOS[trailerType]) || FALLBACK_REFERENCE_PHOTOS['Motorhome'];
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -207,138 +235,18 @@ export default function PhotoUpload({
           Ejemplos de fotos aceptadas:
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-          {trailerType === 'Trailer' && (
-            <>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/trailer/frontal.jpeg"
-                    alt="Ejemplo de foto frontal de trailer"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Frontal</span>
+          {effectiveReferencePhotos.map((photo, index) => (
+            <div key={`${photo.label}-${index}`} className="flex flex-col items-center">
+              <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
+                <img
+                  src={photo.path}
+                  alt={`Ejemplo de foto: ${photo.label}`}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/trailer/lateral.jpeg"
-                    alt="Ejemplo de foto lateral de trailer"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Lateral</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/trailer/trasera.jpeg"
-                    alt="Ejemplo de foto trasera de trailer"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Trasera</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/ficha_electrica.jpeg"
-                    alt="Ejemplo de ficha eléctrica"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Ficha eléctrica</span>
-              </div>
-            </>
-          )}
-          {trailerType === 'Rolling Box' && (
-            <>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/rollingbox/frontal.jpeg"
-                    alt="Ejemplo de foto frontal de rolling box"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Frontal</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/rollingbox/lateral.jpeg"
-                    alt="Ejemplo de foto lateral de rolling box"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Lateral</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/rollingbox/trasera.jpeg"
-                    alt="Ejemplo de foto trasera de rolling box"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Trasera</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/rollingbox/rueda_auxilio.jpeg"
-                    alt="Ejemplo de rueda de auxilio"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Rueda de auxilio</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/reference_photos/ficha_electrica.jpeg"
-                    alt="Ejemplo de ficha eléctrica"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Ficha eléctrica</span>
-              </div>
-            </>
-          )}
-          {(trailerType === 'Motorhome' || !trailerType) && (
-            <>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/ejemplo_trailer_frontal.jpg"
-                    alt="Ejemplo de foto frontal de trailer"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Frontal</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/ejemplo_trailer_lateral.jpg"
-                    alt="Ejemplo de foto lateral de trailer"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Lateral</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 mb-1">
-                  <img
-                    src="/ejemplo_trailer_chasis.jpg"
-                    alt="Ejemplo de foto de chasis de trailer"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-xs text-slate-400">Chasis</span>
-              </div>
-            </>
-          )}
+              <span className="text-xs text-slate-400">{photo.label}</span>
+            </div>
+          ))}
         </div>
       </div>
 

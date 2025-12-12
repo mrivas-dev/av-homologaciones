@@ -11,9 +11,12 @@ import {
   submitHomologation,
   getDocumentUrl,
   formatFileSize,
+  getTrailerTypes,
+  findTrailerTypeByName,
   Homologation,
   Photo,
   AdminDocument,
+  PublicTrailerType,
   ApiError
 } from '../../../utils/api';
 import { FiCheck, FiLoader, FiAlertCircle, FiSave, FiCreditCard, FiSend, FiTruck, FiUser, FiCamera, FiClock, FiCheckCircle, FiXCircle, FiFileText, FiDownload, FiEye } from 'react-icons/fi';
@@ -216,6 +219,8 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
   onPhotosChange: (photos: Photo[]) => void;
   onSavingChange: (isSaving: boolean) => void;
   isPaid: boolean;
+  trailerTypes?: PublicTrailerType[];
+  trailerTypesLoading?: boolean;
 }>(function GeneralInfoStep({
   homologation,
   photos,
@@ -223,6 +228,8 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
   onPhotosChange,
   onSavingChange,
   isPaid,
+  trailerTypes,
+  trailerTypesLoading,
 }, ref) {
   const [trailerData, setTrailerData] = useState<TrailerFormData>({
     trailerType: homologation.trailerType || '',
@@ -383,6 +390,8 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
         errors={errors.trailer}
         disabled={formsDisabled}
         isLocked={isPaid}
+        trailerTypes={trailerTypes}
+        trailerTypesLoading={trailerTypesLoading}
       />
 
       {/* Owner Info Form */}
@@ -402,13 +411,18 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
         disabled={formsDisabled}
         isLocked={isPaid}
         trailerType={trailerData.trailerType || homologation.trailerType}
+        referencePhotos={
+          trailerTypes && (trailerData.trailerType || homologation.trailerType)
+            ? findTrailerTypeByName(trailerTypes, trailerData.trailerType || homologation.trailerType || '')?.referencePhotos
+            : undefined
+        }
       />
     </div>
   );
 });
 
-// Price mapping by trailer type (in cents)
-const TRAILER_TYPE_PRICES: Record<string, number> = {
+// Fallback price mapping by trailer type (in cents) - used when API is unavailable
+const FALLBACK_TRAILER_TYPE_PRICES: Record<string, number> = {
   'Trailer': 100,      // ARS $1 = 100 cents
   'Rolling Box': 200, // ARS $2 = 200 cents
   'Motorhome': 300,   // ARS $3 = 300 cents
@@ -420,20 +434,37 @@ function PaymentStep({
   onHomologationUpdate,
   requiredFieldsValidation,
   onGoToStep1,
+  trailerTypes,
 }: {
   homologation: Homologation;
   onHomologationUpdate: (data: Homologation) => void;
   requiredFieldsValidation: RequiredFieldsValidation;
   onGoToStep1: () => void;
+  trailerTypes?: PublicTrailerType[];
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Calculate price based on trailer type, default to Trailer price if not set
-  const PRICE = homologation.trailerType 
-    ? (TRAILER_TYPE_PRICES[homologation.trailerType] || TRAILER_TYPE_PRICES['Trailer'])
-    : TRAILER_TYPE_PRICES['Trailer'];
+  // Calculate price based on trailer type using API data or fallback
+  const getPrice = (): number => {
+    const typeName = homologation.trailerType;
+    
+    // Try to get price from API trailer types first
+    if (trailerTypes && typeName) {
+      const trailerType = findTrailerTypeByName(trailerTypes, typeName);
+      if (trailerType) {
+        return trailerType.price;
+      }
+    }
+    
+    // Fall back to hardcoded prices
+    return typeName 
+      ? (FALLBACK_TRAILER_TYPE_PRICES[typeName] || FALLBACK_TRAILER_TYPE_PRICES['Trailer'])
+      : FALLBACK_TRAILER_TYPE_PRICES['Trailer'];
+  };
+
+  const PRICE = getPrice();
 
   const canPay = requiredFieldsValidation.isComplete;
 
@@ -1109,6 +1140,8 @@ export default function HomologationTrackingPage() {
 
   const [homologation, setHomologation] = useState<Homologation | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [trailerTypes, setTrailerTypes] = useState<PublicTrailerType[]>([]);
+  const [trailerTypesLoading, setTrailerTypesLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
@@ -1116,6 +1149,23 @@ export default function HomologationTrackingPage() {
 
   // Ref to access GeneralInfoStep methods
   const generalInfoRef = useRef<GeneralInfoStepHandle>(null);
+
+  // Fetch trailer types (separate from main data, non-blocking)
+  useEffect(() => {
+    const fetchTrailerTypesData = async () => {
+      try {
+        setTrailerTypesLoading(true);
+        const response = await getTrailerTypes();
+        setTrailerTypes(response.data);
+      } catch (err) {
+        console.error('Failed to fetch trailer types:', err);
+        // Don't block the page, just use fallback types
+      } finally {
+        setTrailerTypesLoading(false);
+      }
+    };
+    fetchTrailerTypesData();
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -1229,6 +1279,8 @@ export default function HomologationTrackingPage() {
             onPhotosChange={handlePhotosChange}
             onSavingChange={handleSavingChange}
             isPaid={isPaid}
+            trailerTypes={trailerTypes}
+            trailerTypesLoading={trailerTypesLoading}
           />
         );
       case 2:
@@ -1238,6 +1290,7 @@ export default function HomologationTrackingPage() {
             onHomologationUpdate={handleHomologationUpdate}
             requiredFieldsValidation={requiredFieldsValidation}
             onGoToStep1={handleGoToStep1}
+            trailerTypes={trailerTypes}
           />
         );
       case 3:

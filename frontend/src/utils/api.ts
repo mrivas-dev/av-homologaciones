@@ -59,6 +59,28 @@ export interface PhotosResponse {
   total: number;
 }
 
+// ============================================================================
+// Trailer Types (Public)
+// ============================================================================
+
+export interface ReferencePhoto {
+  label: string;
+  path: string;
+}
+
+export interface PublicTrailerType {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  referencePhotos: ReferencePhoto[];
+}
+
+export interface TrailerTypesResponse {
+  data: PublicTrailerType[];
+  total: number;
+}
+
 export interface LookupOrCreateResponse {
   found: boolean;
   homologation: Homologation;
@@ -216,6 +238,45 @@ export async function updateHomologationStatus(
   }
 
   return data as Homologation;
+}
+
+// ============================================================================
+// Trailer Types API (Public)
+// ============================================================================
+
+/**
+ * Fetch active trailer types (public - for forms)
+ */
+export async function getTrailerTypes(): Promise<TrailerTypesResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/trailer-types`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || 'Failed to fetch trailer types',
+      response.status,
+      data.code,
+      data.details
+    );
+  }
+
+  return data as TrailerTypesResponse;
+}
+
+/**
+ * Get trailer type by name (from cached/fetched list)
+ */
+export function findTrailerTypeByName(
+  trailerTypes: PublicTrailerType[],
+  name: string
+): PublicTrailerType | undefined {
+  return trailerTypes.find((t) => t.name === name);
 }
 
 // ============================================================================
