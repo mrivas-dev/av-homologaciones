@@ -119,7 +119,7 @@ function TrailerTypeModal({ isOpen, onClose, onSave, trailerType, isLoading }: T
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
               placeholder="Ej: Trailer, Rolling Box"
             />
           </div>
@@ -138,7 +138,7 @@ function TrailerTypeModal({ isOpen, onClose, onSave, trailerType, isLoading }: T
                 required
                 min="0"
                 step="0.01"
-                className="w-full pl-8 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                className="w-full pl-8 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
                 placeholder="0.00"
               />
             </div>
@@ -155,7 +155,7 @@ function TrailerTypeModal({ isOpen, onClose, onSave, trailerType, isLoading }: T
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
               min="0"
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
               placeholder="0"
             />
           </div>
@@ -165,7 +165,7 @@ function TrailerTypeModal({ isOpen, onClose, onSave, trailerType, isLoading }: T
             <button
               type="button"
               onClick={() => setIsActive(!isActive)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${isActive ? 'bg-amber-500' : 'bg-slate-700'}`}
+              className={`relative w-12 h-6 rounded-full transition-colors ${isActive ? 'bg-blue-500' : 'bg-slate-700'}`}
             >
               <span 
                 className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${isActive ? 'translate-x-6' : ''}`} 
@@ -211,20 +211,20 @@ function TrailerTypeModal({ isOpen, onClose, onSave, trailerType, isLoading }: T
                 value={newPhotoLabel}
                 onChange={(e) => setNewPhotoLabel(e.target.value)}
                 placeholder="Etiqueta (ej: Frontal)"
-                className="flex-1 px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                className="flex-1 px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
               />
               <input
                 type="text"
                 value={newPhotoPath}
                 onChange={(e) => setNewPhotoPath(e.target.value)}
                 placeholder="Ruta (ej: /reference_photos/trailer/frontal.jpeg)"
-                className="flex-[2] px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                className="flex-[2] px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
               />
               <button
                 type="button"
                 onClick={handleAddPhoto}
                 disabled={!newPhotoLabel.trim() || !newPhotoPath.trim()}
-                className="px-3 py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
               >
                 <FiPlus className="w-4 h-4" />
               </button>
@@ -247,7 +247,7 @@ function TrailerTypeModal({ isOpen, onClose, onSave, trailerType, isLoading }: T
             <button
               type="submit"
               disabled={isLoading || !name.trim() || !price}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
             >
               {isLoading ? (
                 <>
@@ -452,7 +452,7 @@ export default function TrailerTypesPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <FiLoader className="w-8 h-8 text-amber-500 animate-spin" />
+        <FiLoader className="w-8 h-8 text-blue-500 animate-spin" />
       </div>
     );
   }
@@ -474,7 +474,7 @@ export default function TrailerTypesPage() {
               className="group flex items-center gap-3 rounded-lg px-2 py-1 -ml-2 hover:bg-slate-800 transition-colors"
               aria-label="Ir al sitio público"
             >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/30">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/30">
                 <span className="text-sm font-bold text-white font-heading">AV</span>
               </div>
               <div>
@@ -516,7 +516,7 @@ export default function TrailerTypesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h2 className="text-2xl font-bold text-white font-heading flex items-center gap-3">
-              <FiTruck className="w-7 h-7 text-amber-500" />
+              <FiTruck className="w-7 h-7 text-blue-500" />
               Tipos de Trailer
             </h2>
             <p className="text-slate-400 mt-1">
@@ -526,7 +526,7 @@ export default function TrailerTypesPage() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={handleOpenCreate}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
             >
               <FiPlus className="w-4 h-4" />
               <span>Nuevo Tipo</span>
@@ -562,7 +562,7 @@ export default function TrailerTypesPage() {
         {isLoading && trailerTypes.length === 0 ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <FiLoader className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-4" />
+              <FiLoader className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
               <p className="text-slate-400">Cargando tipos de trailer...</p>
             </div>
           </div>
@@ -574,7 +574,7 @@ export default function TrailerTypesPage() {
               <p className="text-slate-500 text-sm mt-1">Crea uno para comenzar</p>
               <button
                 onClick={handleOpenCreate}
-                className="inline-flex items-center gap-2 px-4 py-2 mt-4 bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 mt-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
               >
                 <FiPlus className="w-4 h-4" />
                 <span>Nuevo Tipo</span>
@@ -610,7 +610,7 @@ export default function TrailerTypesPage() {
 
                 {/* Price */}
                 <div className="flex items-center gap-2 mb-4 p-3 bg-slate-800/50 rounded-lg">
-                  <FiDollarSign className="w-5 h-5 text-amber-500" />
+                  <FiDollarSign className="w-5 h-5 text-blue-500" />
                   <span className="text-xl font-bold text-white">
                     ${(trailerType.price / 100).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                   </span>

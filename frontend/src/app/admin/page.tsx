@@ -41,9 +41,9 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; bo
   },
   'Pending Review': { 
     label: 'Pendiente', 
-    bg: 'bg-amber-500/10', 
-    text: 'text-amber-400',
-    border: 'border-amber-500/20'
+    bg: 'bg-blue-500/10', 
+    text: 'text-blue-400',
+    border: 'border-blue-500/20'
   },
   'Payed': { 
     label: 'Pagado', 
@@ -181,7 +181,7 @@ export default function AdminDashboardPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <FiLoader className="w-8 h-8 text-amber-500 animate-spin" />
+        <FiLoader className="w-8 h-8 text-blue-500 animate-spin" />
       </div>
     );
   }
@@ -203,7 +203,7 @@ export default function AdminDashboardPage() {
               className="group flex items-center gap-3 rounded-lg px-2 py-1 -ml-2 hover:bg-slate-800 transition-colors"
               aria-label="Ir al sitio público"
             >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/30">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/30">
                 <span className="text-sm font-bold text-white font-heading">AV</span>
               </div>
               <div>
@@ -243,7 +243,7 @@ export default function AdminDashboardPage() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => router.push('/admin/trailer-types')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
             >
               <FiTruck className="w-4 h-4" />
               <span>Tipos de Trailer</span>
@@ -286,7 +286,7 @@ export default function AdminDashboardPage() {
         {isLoading && homologations.length === 0 ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <FiLoader className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-4" />
+              <FiLoader className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
               <p className="text-slate-400">Cargando homologaciones...</p>
             </div>
           </div>

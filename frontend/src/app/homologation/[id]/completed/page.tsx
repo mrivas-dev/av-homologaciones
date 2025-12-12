@@ -78,7 +78,7 @@ export default function CompletedHomologationPage() {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <FiLoader className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-4" />
+          <FiLoader className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
           <p className="text-slate-400">Cargando homologación...</p>
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function CompletedHomologationPage() {
           <p className="text-slate-400 mb-6">{error || 'Homologación no encontrada'}</p>
           <button
             onClick={() => router.push('/')}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-amber-500/20"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/20"
           >
             Volver al inicio
           </button>
@@ -109,16 +109,16 @@ export default function CompletedHomologationPage() {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
         <div className="max-w-lg w-full bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center">
-          <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-4">
-            <FiAlertCircle className="w-7 h-7 text-amber-400" />
+          <div className="w-14 h-14 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mx-auto mb-4">
+            <FiAlertCircle className="w-7 h-7 text-blue-400" />
           </div>
           <h2 className="text-xl font-semibold text-white mb-2">Tu homologación aún no está completada</h2>
           <p className="text-slate-400 mb-6">
-            Estado actual: <span className="text-amber-300 font-semibold">{homologation.status}</span>
+            Estado actual: <span className="text-blue-300 font-semibold">{homologation.status}</span>
           </p>
           <button
             onClick={() => router.push(`/homologation/${homologation.id}`)}
-            className="inline-flex items-center gap-2 px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-amber-500/20"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/20"
           >
             Ir al seguimiento
           </button>
@@ -175,7 +175,7 @@ export default function CompletedHomologationPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
-            <div className="flex items-center gap-2 text-amber-400 mb-3">
+            <div className="flex items-center gap-2 text-blue-400 mb-3">
               <FiUser className="w-5 h-5" />
               <h3 className="text-lg font-semibold text-white">Datos del usuario</h3>
             </div>
@@ -200,7 +200,7 @@ export default function CompletedHomologationPage() {
           </div>
 
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
-            <div className="flex items-center gap-2 text-amber-400 mb-3">
+            <div className="flex items-center gap-2 text-blue-400 mb-3">
               <FiTruck className="w-5 h-5" />
               <h3 className="text-lg font-semibold text-white">Datos del trailer</h3>
             </div>
@@ -228,7 +228,7 @@ export default function CompletedHomologationPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-amber-400">
+              <div className="flex items-center gap-2 text-blue-400">
                 <FiImage className="w-5 h-5" />
                 <h3 className="text-lg font-semibold text-white">Fotos ({photos.length})</h3>
               </div>
@@ -250,7 +250,7 @@ export default function CompletedHomologationPage() {
                       className="w-full h-full object-cover"
                     />
                     {photo.isIdDocument && (
-                      <span className="absolute top-2 right-2 px-2 py-0.5 bg-amber-500/90 text-white text-xs rounded">
+                      <span className="absolute top-2 right-2 px-2 py-0.5 bg-blue-500/90 text-white text-xs rounded">
                         DNI
                       </span>
                     )}
@@ -261,7 +261,7 @@ export default function CompletedHomologationPage() {
           </div>
 
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
-            <div className="flex items-center gap-2 text-amber-400">
+            <div className="flex items-center gap-2 text-blue-400">
               <FiCreditCard className="w-5 h-5" />
               <h3 className="text-lg font-semibold text-white">Pago y documentos</h3>
             </div>
@@ -339,7 +339,7 @@ export default function CompletedHomologationPage() {
         >
           <button
             onClick={() => setSelectedPhoto(null)}
-            className="absolute top-6 right-6 text-white hover:text-amber-400 transition-colors"
+            className="absolute top-6 right-6 text-white hover:text-blue-400 transition-colors"
           >
             <FiXCircle className="w-8 h-8" />
           </button>

@@ -185,7 +185,7 @@ export default function DocumentUploadSection({
   return (
     <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
       <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-        <FiFile className="w-5 h-5 text-amber-500" />
+        <FiFile className="w-5 h-5 text-blue-500" />
         Documentos Administrativos
       </h2>
 
@@ -206,7 +206,7 @@ export default function DocumentUploadSection({
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as AdminDocumentType)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-amber-500"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-blue-500"
             >
               {DOCUMENT_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -242,7 +242,7 @@ export default function DocumentUploadSection({
           />
           <label
             htmlFor="document-upload"
-            className={`inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-lg transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg transition-colors cursor-pointer ${
               isUploading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
@@ -293,7 +293,7 @@ export default function DocumentUploadSection({
                 href={getDocumentUrl(previewDoc.filePath)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
+                className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
               >
                 <FiDownload className="w-4 h-4" />
                 Descargar

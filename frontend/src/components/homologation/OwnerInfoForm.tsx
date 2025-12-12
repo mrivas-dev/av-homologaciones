@@ -41,7 +41,7 @@ export default function OwnerInfoForm({
   return (
     <div className={`bg-slate-900/50 border rounded-xl p-6 ${isLocked ? 'border-blue-500/30' : 'border-slate-800'}`}>
       <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-        <FiUser className="w-5 h-5 text-amber-400" />
+        <FiUser className="w-5 h-5 text-blue-400" />
         Información del Propietario
         {isLocked && (
           <span className="ml-auto flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-400">
@@ -67,7 +67,7 @@ export default function OwnerInfoForm({
             className={`
               w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white
               placeholder:text-slate-500
-              focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500
+              focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500
               disabled:opacity-50 disabled:cursor-not-allowed
               ${errors.ownerFullName ? 'border-red-500' : 'border-slate-700'}
             `}
@@ -92,7 +92,7 @@ export default function OwnerInfoForm({
             className={`
               w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white
               placeholder:text-slate-500
-              focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500
+              focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500
               disabled:opacity-50 disabled:cursor-not-allowed
               ${errors.ownerEmail ? 'border-red-500' : 'border-slate-700'}
             `}

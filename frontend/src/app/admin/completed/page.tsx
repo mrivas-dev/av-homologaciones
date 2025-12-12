@@ -104,7 +104,7 @@ export default function CompletedHomologationsPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <FiLoader className="w-8 h-8 text-amber-500 animate-spin" />
+        <FiLoader className="w-8 h-8 text-blue-500 animate-spin" />
       </div>
     );
   }
@@ -186,7 +186,7 @@ export default function CompletedHomologationsPage() {
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <FiLoader className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-4" />
+              <FiLoader className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
               <p className="text-slate-400">Cargando homologaciones completadas...</p>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function CompletedHomologationsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-amber-400 mb-3">
+                      <div className="flex items-center gap-2 text-blue-400 mb-3">
                         <FiUser className="w-4 h-4" />
                         <h4 className="text-sm font-semibold text-white">Información del Usuario</h4>
                       </div>
@@ -276,7 +276,7 @@ export default function CompletedHomologationsPage() {
                     </div>
 
                     <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-amber-400 mb-3">
+                      <div className="flex items-center gap-2 text-blue-400 mb-3">
                         <FiTruck className="w-4 h-4" />
                         <h4 className="text-sm font-semibold text-white">
                           Información del Trailer
@@ -310,7 +310,7 @@ export default function CompletedHomologationsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2 text-amber-400">
+                        <div className="flex items-center gap-2 text-blue-400">
                           <FiImage className="w-4 h-4" />
                           <h4 className="text-sm font-semibold text-white">
                             Fotos ({photos.length})
@@ -346,7 +346,7 @@ export default function CompletedHomologationsPage() {
                     </div>
 
                     <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-4 space-y-4">
-                      <div className="flex items-center gap-2 text-amber-400">
+                      <div className="flex items-center gap-2 text-blue-400">
                         <FiFileText className="w-4 h-4" />
                         <h4 className="text-sm font-semibold text-white">Documentación</h4>
                       </div>

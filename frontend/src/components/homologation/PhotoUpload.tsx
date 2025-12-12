@@ -213,7 +213,7 @@ export default function PhotoUpload({
   return (
     <div className={`bg-slate-900/50 border rounded-xl p-6 ${isLocked ? 'border-blue-500/30' : 'border-slate-800'}`}>
       <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-        <FiCamera className="w-5 h-5 text-amber-400" />
+        <FiCamera className="w-5 h-5 text-blue-400" />
         Fotos del Trailer
         {isLocked && (
           <span className="ml-auto flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-400">
@@ -344,13 +344,13 @@ export default function PhotoUpload({
                 </>
               ) : (
                 <>
-                  <FiLoader className="w-8 h-8 text-amber-400 animate-spin mb-2" />
+                  <FiLoader className="w-8 h-8 text-blue-400 animate-spin mb-2" />
                   <p className="text-xs text-slate-400 mb-2 truncate max-w-full">
                     {file.file.name}
                   </p>
                   <div className="w-full bg-slate-700 rounded-full h-1.5">
                     <div
-                      className="bg-amber-500 h-1.5 rounded-full transition-all duration-300"
+                      className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
                       style={{ width: `${file.progress}%` }}
                     />
                   </div>
@@ -373,13 +373,13 @@ export default function PhotoUpload({
               flex flex-col items-center justify-center cursor-pointer
               transition-all duration-200
               ${isDragging
-                ? 'border-amber-500 bg-amber-500/10'
+                ? 'border-blue-500 bg-blue-500/10'
                 : 'border-slate-600 hover:border-slate-500 hover:bg-slate-800/50'
               }
             `}
           >
-            <FiUpload className={`w-8 h-8 mb-2 ${isDragging ? 'text-amber-400' : 'text-slate-500'}`} />
-            <p className={`text-sm ${isDragging ? 'text-amber-400' : 'text-slate-500'}`}>
+            <FiUpload className={`w-8 h-8 mb-2 ${isDragging ? 'text-blue-400' : 'text-slate-500'}`} />
+            <p className={`text-sm ${isDragging ? 'text-blue-400' : 'text-slate-500'}`}>
               {isDragging ? 'Soltar aquí' : 'Agregar foto'}
             </p>
             <p className="text-xs text-slate-600 mt-1">
@@ -410,7 +410,7 @@ export default function PhotoUpload({
           {photos.length} de {MAX_PHOTOS} fotos
         </span>
         {photos.length >= MAX_PHOTOS && (
-          <span className="text-amber-400">Máximo alcanzado</span>
+          <span className="text-blue-400">Máximo alcanzado</span>
         )}
       </div>
     </div>
