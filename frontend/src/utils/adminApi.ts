@@ -48,6 +48,52 @@ export interface HomologationDetail extends HomologationListItem {
   version: number;
 }
 
+// =============================================
+// Trailer Types
+// =============================================
+
+export interface ReferencePhoto {
+  label: string;
+  path: string;
+}
+
+export interface TrailerType {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  referencePhotos: ReferencePhoto[];
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+}
+
+export interface TrailerTypesResponse {
+  data: TrailerType[];
+  total: number;
+}
+
+export interface CreateTrailerTypeData {
+  name: string;
+  slug?: string;
+  price: number;
+  referencePhotos?: ReferencePhoto[];
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
+export interface UpdateTrailerTypeData {
+  name?: string;
+  slug?: string;
+  price?: number;
+  referencePhotos?: ReferencePhoto[];
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
 export interface HomologationsResponse {
   data: HomologationListItem[];
   total: number;
@@ -281,5 +327,99 @@ export async function deleteDocument(
 export function getDocumentUrl(filePath: string): string {
   const fileName = filePath.split('/').pop() || filePath.split('\\').pop() || filePath;
   return `${API_BASE_URL}/uploads/${fileName}`;
+}
+
+// =============================================
+// Trailer Type Admin API Functions
+// =============================================
+
+/**
+ * Fetch all trailer types (admin view - includes inactive)
+ */
+export async function fetchTrailerTypes(
+  token: string
+): Promise<TrailerTypesResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/trailer-types`,
+    {
+      headers: getAuthHeaders(token),
+    }
+  );
+
+  return handleResponse<TrailerTypesResponse>(response);
+}
+
+/**
+ * Fetch a single trailer type by ID
+ */
+export async function fetchTrailerTypeById(
+  token: string,
+  id: string
+): Promise<TrailerType> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/trailer-types/${id}`,
+    {
+      headers: getAuthHeaders(token),
+    }
+  );
+
+  return handleResponse<TrailerType>(response);
+}
+
+/**
+ * Create a new trailer type
+ */
+export async function createTrailerType(
+  token: string,
+  data: CreateTrailerTypeData
+): Promise<TrailerType> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/trailer-types`,
+    {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+    }
+  );
+
+  return handleResponse<TrailerType>(response);
+}
+
+/**
+ * Update a trailer type
+ */
+export async function updateTrailerType(
+  token: string,
+  id: string,
+  data: UpdateTrailerTypeData
+): Promise<TrailerType> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/trailer-types/${id}`,
+    {
+      method: 'PATCH',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+    }
+  );
+
+  return handleResponse<TrailerType>(response);
+}
+
+/**
+ * Delete a trailer type
+ */
+export async function deleteTrailerType(
+  token: string,
+  id: string
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/trailer-types/${id}`,
+    {
+      method: 'DELETE',
+      headers: getAuthHeaders(token),
+    }
+  );
+
+  return handleResponse(response);
 }
 

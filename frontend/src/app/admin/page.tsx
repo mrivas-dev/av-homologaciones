@@ -242,6 +242,13 @@ export default function AdminDashboardPage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <button
+              onClick={() => router.push('/admin/trailer-types')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition-colors"
+            >
+              <FiTruck className="w-4 h-4" />
+              <span>Tipos de Trailer</span>
+            </button>
+            <button
               onClick={() => router.push('/admin/completed')}
               className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors"
             >
