@@ -47,9 +47,9 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; bo
   },
   'Pending Review': {
     label: 'Pendiente',
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
-    border: 'border-amber-500/20'
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-400',
+    border: 'border-blue-500/20'
   },
   'Payed': {
     label: 'Pagado',
@@ -263,7 +263,7 @@ export default function AdminHomologationDetailPage() {
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <FiLoader className="w-8 h-8 text-amber-500 animate-spin" />
+        <FiLoader className="w-8 h-8 text-blue-500 animate-spin" />
       </div>
     );
   }
@@ -323,7 +323,7 @@ export default function AdminHomologationDetailPage() {
                 className="hidden sm:flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
                 aria-label="Ir al sitio público"
               >
-                <div className="w-8 h-8 rounded-md bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <div className="w-8 h-8 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                   <span className="text-xs font-bold text-white font-heading">AV</span>
                 </div>
                 <span className="text-sm font-medium">Inicio</span>
@@ -352,7 +352,7 @@ export default function AdminHomologationDetailPage() {
           {/* Owner Information */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <FiUser className="w-5 h-5 text-amber-500" />
+              <FiUser className="w-5 h-5 text-blue-500" />
               Información del Propietario
             </h2>
             <div className="space-y-4">
@@ -391,7 +391,7 @@ export default function AdminHomologationDetailPage() {
           {/* Trailer Information */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <FiTruck className="w-5 h-5 text-amber-500" />
+              <FiTruck className="w-5 h-5 text-blue-500" />
               Información del Vehículo
             </h2>
             <div className="space-y-4">
@@ -435,7 +435,7 @@ export default function AdminHomologationDetailPage() {
         {/* Photos Section */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 mb-8">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <FiImage className="w-5 h-5 text-amber-500" />
+            <FiImage className="w-5 h-5 text-blue-500" />
             Fotos {homologation.photos && homologation.photos.length > 0 && `(${homologation.photos.length})`}
           </h2>
           {homologation.photos && homologation.photos.length > 0 ? (
@@ -448,7 +448,7 @@ export default function AdminHomologationDetailPage() {
                   <button
                     key={photo.id}
                     onClick={() => !hasError && setSelectedPhoto(photoUrl)}
-                    className="relative aspect-square rounded-lg overflow-hidden border border-slate-800 hover:border-amber-500/50 transition-colors group"
+                    className="relative aspect-square rounded-lg overflow-hidden border border-slate-800 hover:border-blue-500/50 transition-colors group"
                     disabled={hasError}
                   >
                     {hasError ? (
@@ -476,7 +476,7 @@ export default function AdminHomologationDetailPage() {
                           }}
                         />
                         {photo.isIdDocument && (
-                          <div className="absolute top-2 right-2 px-2 py-1 bg-amber-500/90 text-white text-xs rounded">
+                          <div className="absolute top-2 right-2 px-2 py-1 bg-blue-500/90 text-white text-xs rounded">
                             DNI
                           </div>
                         )}

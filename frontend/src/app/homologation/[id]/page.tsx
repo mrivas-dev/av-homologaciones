@@ -65,7 +65,7 @@ function WizardStepper({
                   relative flex items-center justify-center w-12 h-12 rounded-full 
                   border-2 transition-all duration-300 ease-in-out
                   ${currentStep === step.id
-                    ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30'
+                    ? 'bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/30'
                     : currentStep > step.id
                       ? 'bg-emerald-500 border-emerald-500'
                       : 'bg-slate-800 border-slate-600 group-hover:border-slate-500'
@@ -85,7 +85,7 @@ function WizardStepper({
               {/* Step Label */}
               <div className="mt-3 text-center">
                 <p className={`text-sm font-medium transition-colors ${currentStep === step.id
-                    ? 'text-amber-400'
+                    ? 'text-blue-400'
                     : currentStep > step.id
                       ? 'text-emerald-400'
                       : 'text-slate-400 group-hover:text-slate-300'
@@ -124,7 +124,7 @@ function WizardStepper({
                   flex items-center justify-center w-10 h-10 rounded-full 
                   border-2 transition-all duration-300
                   ${currentStep === step.id
-                    ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30'
+                    ? 'bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/30'
                     : currentStep > step.id
                       ? 'bg-emerald-500 border-emerald-500'
                       : 'bg-slate-800 border-slate-600'
@@ -153,7 +153,7 @@ function WizardStepper({
 
         {/* Current Step Label */}
         <div className="text-center">
-          <p className="text-sm font-medium text-amber-400">
+          <p className="text-sm font-medium text-blue-400">
             {steps.find(s => s.id === currentStep)?.name}
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -368,7 +368,7 @@ const GeneralInfoStep = forwardRef<GeneralInfoStepHandle, {
               flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
               transition-all duration-200
               ${hasChanges
-                ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20'
+                ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/20'
                 : 'bg-slate-800 text-slate-500 cursor-not-allowed'
               }
             `}
@@ -498,7 +498,7 @@ function PaymentStep({
       <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-8 max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h3 className="text-2xl font-semibold text-white mb-2 flex items-center justify-center gap-2">
-            <FiCreditCard className="w-6 h-6 text-amber-400" />
+            <FiCreditCard className="w-6 h-6 text-blue-400" />
             Pago del Trámite
           </h3>
           <p className="text-slate-400">
@@ -508,13 +508,13 @@ function PaymentStep({
 
         {/* Missing Fields Warning */}
         {!canPay && !isPaid && (
-          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <div className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                <FiAlertCircle className="w-5 h-5 text-amber-400" />
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <FiAlertCircle className="w-5 h-5 text-blue-400" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-amber-400 mb-2">
+                <p className="font-medium text-blue-400 mb-2">
                   Campos obligatorios incompletos
                 </p>
                 <p className="text-sm text-slate-400 mb-3">
@@ -523,14 +523,14 @@ function PaymentStep({
                 <ul className="text-sm text-slate-300 space-y-1 mb-4">
                   {requiredFieldsValidation.missingFields.map((field, index) => (
                     <li key={index} className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
                       {field}
                     </li>
                   ))}
                 </ul>
                 <button
                   onClick={onGoToStep1}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
                 >
                   Completar información
                 </button>
@@ -630,7 +630,7 @@ function PaymentStep({
 
 // Status badge configuration
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
-  'Draft': { label: 'Borrador', color: 'text-amber-400', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/20' },
+  'Draft': { label: 'Borrador', color: 'text-blue-400', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
   'Pending Review': { label: 'En Revisión', color: 'text-blue-400', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
   'Payed': { label: 'Pagado', color: 'text-cyan-400', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/20' },
   'Approved': { label: 'Aprobado', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/20' },
@@ -817,7 +817,7 @@ function ReviewStep({
           {/* Trailer Info */}
           <div className="bg-slate-800/50 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <FiTruck className="w-5 h-5 text-amber-400" />
+              <FiTruck className="w-5 h-5 text-blue-400" />
               <span className="font-medium text-white">Información del Trailer</span>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -843,7 +843,7 @@ function ReviewStep({
           {/* Owner Info */}
           <div className="bg-slate-800/50 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <FiUser className="w-5 h-5 text-amber-400" />
+              <FiUser className="w-5 h-5 text-blue-400" />
               <span className="font-medium text-white">Información del Propietario</span>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -871,7 +871,7 @@ function ReviewStep({
             {/* Photos */}
             <div className="bg-slate-800/50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <FiCamera className="w-5 h-5 text-amber-400" />
+                <FiCamera className="w-5 h-5 text-blue-400" />
                 <span className="font-medium text-white">Fotos</span>
               </div>
               <p className="text-sm text-slate-300">
@@ -885,7 +885,7 @@ function ReviewStep({
             {/* Payment */}
             <div className="bg-slate-800/50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <FiCreditCard className="w-5 h-5 text-amber-400" />
+                <FiCreditCard className="w-5 h-5 text-blue-400" />
                 <span className="font-medium text-white">Pago</span>
               </div>
               {isPaid ? (
@@ -908,7 +908,7 @@ function ReviewStep({
 
           {loadingDocuments ? (
             <div className="flex items-center justify-center py-8">
-              <FiLoader className="w-6 h-6 text-amber-400 animate-spin" />
+              <FiLoader className="w-6 h-6 text-blue-400 animate-spin" />
             </div>
           ) : documentsError ? (
             <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3">
@@ -926,7 +926,7 @@ function ReviewStep({
               {documents.filter(doc => doc.documentType === 'payment_receipt').length > 0 && (
                 <div className="bg-slate-800/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <FiCreditCard className="w-5 h-5 text-amber-400" />
+                    <FiCreditCard className="w-5 h-5 text-blue-400" />
                     <span className="font-medium text-white">Comprobantes de Pago</span>
                   </div>
                   <div className="space-y-2">
@@ -987,7 +987,7 @@ function ReviewStep({
               {documents.filter(doc => doc.documentType === 'homologation_papers').length > 0 && (
                 <div className="bg-slate-800/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <FiFileText className="w-5 h-5 text-amber-400" />
+                    <FiFileText className="w-5 h-5 text-blue-400" />
                     <span className="font-medium text-white">Documentos de Homologación</span>
                   </div>
                   <div className="space-y-2">
@@ -1056,16 +1056,16 @@ function ReviewStep({
             {warnings.map((warning, index) => (
               <div
                 key={index}
-                className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20"
+                className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <FiAlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-amber-200">{warning.message}</p>
+                    <FiAlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-blue-200">{warning.message}</p>
                   </div>
                   <button
                     onClick={warning.action}
-                    className="text-sm font-medium text-amber-400 hover:text-amber-300 whitespace-nowrap"
+                    className="text-sm font-medium text-blue-400 hover:text-blue-300 whitespace-nowrap"
                   >
                     {warning.actionLabel} →
                   </button>
@@ -1313,7 +1313,7 @@ export default function HomologationTrackingPage() {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <FiLoader className="w-8 h-8 text-amber-500 animate-spin mx-auto mb-4" />
+          <FiLoader className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
           <p className="text-slate-400">Cargando...</p>
         </div>
       </div>
@@ -1331,7 +1331,7 @@ export default function HomologationTrackingPage() {
           <p className="text-slate-400 mb-6">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-amber-500/20"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/20"
           >
             Ir al inicio
           </button>
@@ -1351,7 +1351,7 @@ export default function HomologationTrackingPage() {
           <p className="text-slate-400 mb-6">Homologación no encontrada</p>
           <button
             onClick={() => router.push('/')}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-amber-500/20"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/20"
           >
             Ir al inicio
           </button>
@@ -1367,7 +1367,7 @@ export default function HomologationTrackingPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <span className="text-sm font-bold text-white">AV</span>
               </div>
               <div>
@@ -1383,7 +1383,7 @@ export default function HomologationTrackingPage() {
       {isAutoSaving && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50">
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
-            <FiLoader className="w-4 h-4 text-amber-400 animate-spin" />
+            <FiLoader className="w-4 h-4 text-blue-400 animate-spin" />
             <span className="text-sm text-slate-300">Guardando cambios...</span>
           </div>
         </div>
@@ -1432,7 +1432,7 @@ export default function HomologationTrackingPage() {
               px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
               ${currentStep === steps.length || isAutoSaving
                 ? 'text-slate-600 cursor-not-allowed'
-                : 'text-white bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-500/20'
+                : 'text-white bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/20'
               }
             `}
           >
