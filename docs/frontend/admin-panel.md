@@ -108,11 +108,11 @@ useEffect(() => {
 - Error display for invalid credentials
 - Loading states during authentication
 - Automatic redirect if already authenticated
-- Modern dark theme with amber accents
+- Modern dark theme with blue accents (matching main page)
 
 **Design:**
 - Dark slate background with geometric grid pattern
-- Gradient accent glows for visual interest
+- Blue to indigo gradient accent glows (matching main page colors)
 - Card-based form with glass morphism effect
 - Responsive layout
 
@@ -548,7 +548,7 @@ The admin panel uses a distinct dark theme:
 - **Background**: `slate-950` (near black)
 - **Cards**: `slate-900` with blur backdrop
 - **Borders**: `slate-800`
-- **Accent**: Amber to Orange gradient
+- **Accent**: Blue to Indigo gradient (matching main page colors)
 - **Text**: White and slate tones
 
 ### Components

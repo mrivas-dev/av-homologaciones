@@ -571,7 +571,7 @@ The page uses Tailwind CSS with the project's dark theme:
 
 - **Background:** `bg-slate-950` (dark)
 - **Cards:** `bg-slate-900/50` with `border-slate-800`
-- **Accent colors:** Amber (primary), Emerald (success)
+- **Accent colors:** Blue (primary, matching main page), Emerald (success)
 - **Typography:** System fonts with slate color variations
 - **Animations:** `animate-in` for smooth step transitions
 
