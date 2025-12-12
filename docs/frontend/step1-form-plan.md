@@ -42,10 +42,12 @@ The form allows users to:
 
 | Field | Type | Required | Validation |
 |-------|------|----------|------------|
-| `trailerType` | Enum | Yes | "Trailer", "Rolling Box", "Motorhome" |
+| `trailerType` | String | Yes | Fetched from `/api/trailer-types` (dynamic, managed via admin panel) |
 | `trailerDimensions` | String | Yes | Format: "4M x 2M x 1.5M" (auto-formatted from separate numeric inputs) |
 | `trailerNumberOfAxles` | Number | Yes | Positive integer |
 | `trailerLicensePlateNumber` | String | Yes | Min 1 char |
+
+**Note:** Trailer types are now dynamic and managed via the Admin Panel (`/admin/trailer-types`). The dropdown is populated from the `trailer_types` database table via the public API endpoint. Each type includes a price and reference photos configuration.
 
 ### Owner Information Fields
 

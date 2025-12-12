@@ -165,16 +165,32 @@ The reference photos displayed depend on the selected trailer type:
 - [x] Styling matches overall design system
 - [x] No impact on existing upload functionality
 
-## Implementation Status: ✅ Completed
+## Implementation Status: ✅ Completed (Updated with Dynamic Configuration)
 
-The reference photos section has been implemented with trailer-type-based conditional rendering:
+The reference photos section has been enhanced with dynamic, admin-configurable reference photos:
 
-- **Trailer Type Detection**: Component receives `trailerType` prop from the current form state (not just saved data)
-- **Real-time Updates**: Reference photos update immediately when the trailer type selector changes, without requiring a save
-- **Conditional Rendering**: Different sets of reference photos based on trailer type
+### Original Implementation (Hardcoded)
+- **Trailer Type Detection**: Component received `trailerType` prop from the current form state
+- **Conditional Rendering**: Different sets of hardcoded reference photos based on trailer type
 - **Image Assets**: Reference photos stored in `/public/reference_photos/` directory
-- **Responsive Grid**: Uses responsive grid layout (2-5 columns) to accommodate different numbers of photos
-- **Compact Design**: Smaller photos with reduced spacing to fit all examples on the page
+
+### Enhanced Implementation (Dynamic - December 2024)
+- **Admin Panel Management**: Reference photos are now configurable via Admin Panel (`/admin/trailer-types`)
+- **API-Driven**: Photos are fetched from `/api/trailer-types` along with trailer type data
+- **Prop-Based**: Component accepts optional `referencePhotos` prop from parent
+- **Fallback Support**: Falls back to hardcoded photos if API data is unavailable
+- **Real-time Updates**: Reference photos update immediately when trailer type changes
+- **Price Integration**: Trailer types also include price configuration used in the payment step
+
+**Data Flow:**
+1. Main page fetches trailer types from API on mount
+2. When user selects a trailer type, the corresponding reference photos are passed to PhotoUpload
+3. PhotoUpload renders photos from the `referencePhotos` prop or uses fallback if not available
+
+**Benefits:**
+- Admins can add/edit/remove reference photos without code changes
+- New trailer types can be added with custom reference photos
+- Each trailer type can have different sets of required photo examples
 
 The implementation ensures users see relevant reference photos for their specific trailer type immediately upon selection, providing instant visual guidance without needing to save the form first.
 

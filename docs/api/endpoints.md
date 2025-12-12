@@ -539,6 +539,174 @@ GET /api/documents/homologation/:homologationId
 
 ---
 
+## Trailer Types Endpoints
+
+### List Active Trailer Types (Public)
+
+Get active trailer types for use in forms. This endpoint is public and returns only active types.
+
+#### Request
+```
+GET /api/trailer-types
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Trailer",
+      "slug": "trailer",
+      "price": 100,
+      "referencePhotos": [
+        {"label": "Frontal", "path": "/reference_photos/trailer/frontal.jpeg"},
+        {"label": "Lateral", "path": "/reference_photos/trailer/lateral.jpeg"}
+      ]
+    }
+  ],
+  "total": 3
+}
+```
+
+**Note:** Price is in cents (e.g., 100 = $1.00 ARS).
+
+---
+
+## Admin Trailer Types Endpoints
+
+All admin trailer types endpoints require authentication with admin role.
+
+### List All Trailer Types (Admin)
+
+Get all trailer types including inactive ones.
+
+#### Request
+```
+GET /api/admin/trailer-types
+Authorization: Bearer <admin-token>
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Trailer",
+      "slug": "trailer",
+      "price": 100,
+      "referencePhotos": [...],
+      "isActive": true,
+      "sortOrder": 1,
+      "createdAt": "2024-12-12T10:00:00.000Z",
+      "updatedAt": "2024-12-12T10:00:00.000Z",
+      "createdBy": "admin-uuid",
+      "updatedBy": "admin-uuid"
+    }
+  ],
+  "total": 3
+}
+```
+
+### Get Trailer Type by ID (Admin)
+
+#### Request
+```
+GET /api/admin/trailer-types/:id
+Authorization: Bearer <admin-token>
+```
+
+### Create Trailer Type (Admin)
+
+#### Request
+```
+POST /api/admin/trailer-types
+Authorization: Bearer <admin-token>
+Content-Type: application/json
+
+{
+  "name": "New Type",
+  "price": 15000,
+  "referencePhotos": [
+    {"label": "Frontal", "path": "/reference_photos/new/frontal.jpeg"}
+  ],
+  "isActive": true,
+  "sortOrder": 4
+}
+```
+
+**Note:** `slug` is auto-generated from `name` if not provided.
+
+#### Response
+**Success (201 Created)**
+```json
+{
+  "id": "uuid",
+  "name": "New Type",
+  "slug": "new-type",
+  "price": 15000,
+  "referencePhotos": [...],
+  "isActive": true,
+  "sortOrder": 4,
+  "createdAt": "2024-12-12T10:00:00.000Z",
+  "updatedAt": "2024-12-12T10:00:00.000Z"
+}
+```
+
+**Error (409 Conflict)**
+```json
+{
+  "error": "A trailer type with this name already exists"
+}
+```
+
+### Update Trailer Type (Admin)
+
+#### Request
+```
+PATCH /api/admin/trailer-types/:id
+Authorization: Bearer <admin-token>
+Content-Type: application/json
+
+{
+  "price": 20000,
+  "isActive": false
+}
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "id": "uuid",
+  "name": "Trailer",
+  "price": 20000,
+  "isActive": false,
+  "...": "..."
+}
+```
+
+### Delete Trailer Type (Admin)
+
+#### Request
+```
+DELETE /api/admin/trailer-types/:id
+Authorization: Bearer <admin-token>
+```
+
+#### Response
+**Success (200 OK)**
+```json
+{
+  "message": "Trailer type deleted successfully"
+}
+```
+
+---
+
 ## Admin Endpoints
 
 All admin endpoints require authentication with admin role.

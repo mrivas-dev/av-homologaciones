@@ -207,3 +207,47 @@ All changes to homologations are automatically logged to the audit_logs table, i
 - Foreign key indexes for all relationships
 - Additional indexes on frequently queried columns (status, dates, searchable fields)
 - Composite indexes for common query patterns
+
+---
+
+## trailer_types
+Stores configurable trailer types with prices and reference photos. Managed by administrators via the admin panel.
+
+| Column | Type | Description | Constraints |
+|--------|------|-------------|-------------|
+| id | VARCHAR(36) | Primary key, UUID | PRIMARY KEY |
+| name | VARCHAR(100) | Display name of trailer type | UNIQUE, NOT NULL |
+| slug | VARCHAR(100) | URL-friendly identifier | UNIQUE, NOT NULL |
+| price | INT | Price in cents (e.g., 10000 = $100.00 ARS) | NOT NULL |
+| reference_photos | JSON | Array of {label, path} objects for example photos | NULLABLE |
+| is_active | BOOLEAN | Whether type is available for selection | DEFAULT TRUE |
+| sort_order | INT | Display order in dropdown | DEFAULT 0 |
+| created_at | TIMESTAMP | Record creation time | DEFAULT CURRENT_TIMESTAMP |
+| updated_at | TIMESTAMP | Last update time | DEFAULT CURRENT_TIMESTAMP ON UPDATE |
+| created_by | VARCHAR(36) | Admin who created | FOREIGN KEY to users(id), NOT NULL |
+| updated_by | VARCHAR(36) | Admin who last updated | FOREIGN KEY to users(id), NOT NULL |
+
+**Indexes:**
+- PRIMARY KEY (id)
+- UNIQUE (name)
+- UNIQUE (slug)
+- idx_trailer_types_is_active (is_active)
+- idx_trailer_types_sort_order (sort_order)
+
+**reference_photos JSON Structure:**
+```json
+[
+  {"label": "Frontal", "path": "/reference_photos/trailer/frontal.jpeg"},
+  {"label": "Lateral", "path": "/reference_photos/trailer/lateral.jpeg"},
+  {"label": "Trasera", "path": "/reference_photos/trailer/trasera.jpeg"}
+]
+```
+
+**Relationships:**
+- trailer_types → users (created_by, updated_by)
+
+**Notes:**
+- Replaces the hardcoded TRAILER_TYPES in the frontend
+- Prices are stored in cents to avoid floating-point issues
+- Reference photos are used to guide users on what photos to upload
+- Only active trailer types appear in the homologation form dropdown

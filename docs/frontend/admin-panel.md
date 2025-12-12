@@ -22,9 +22,13 @@ frontend/src/
 │       ├── login/
 │       │   └── page.tsx                  # Login page
 │       ├── page.tsx                      # Dashboard page (list view)
-│       └── homologation/
-│           └── [id]/
-│               └── page.tsx              # Detail page for single homologation
+│       ├── completed/
+│       │   └── page.tsx                  # Completed homologations view
+│       ├── homologation/
+│       │   └── [id]/
+│       │       └── page.tsx              # Detail page for single homologation
+│       └── trailer-types/
+│           └── page.tsx                  # Trailer types management page
 ├── components/
 │   └── admin/
 │       ├── index.ts                      # Exports for admin components
@@ -572,6 +576,63 @@ Custom components follow the existing Tailwind patterns from the main site but w
 - Manual logout clears local storage
 - Failed token verification triggers logout
 
+### Trailer Types Management Page (`/admin/trailer-types`)
+
+**Purpose:** Manage trailer types with their prices and reference photos.
+
+**Features:**
+- Card grid layout showing all trailer types
+- Each card displays: Name, slug, price (in ARS), reference photos count, active status
+- Create new trailer type modal with:
+  - Name input
+  - Price input (displayed in ARS, stored in cents)
+  - Sort order
+  - Active/inactive toggle
+  - Reference photos manager (add label + path pairs)
+- Edit existing trailer types
+- Toggle active/inactive status directly from card
+- Delete trailer type with confirmation modal
+- Navigation link from admin dashboard
+
+**API Functions** in `frontend/src/utils/adminApi.ts`:
+- `fetchTrailerTypes(token)` - List all trailer types (admin view)
+- `fetchTrailerTypeById(token, id)` - Get single trailer type
+- `createTrailerType(token, data)` - Create new trailer type
+- `updateTrailerType(token, id, data)` - Update trailer type
+- `deleteTrailerType(token, id)` - Delete trailer type
+
+**Public API** in `frontend/src/utils/api.ts`:
+- `getTrailerTypes()` - Fetch active trailer types (for forms)
+- `findTrailerTypeByName(trailerTypes, name)` - Find type by name
+
+**Types:**
+```typescript
+interface ReferencePhoto {
+  label: string;
+  path: string;
+}
+
+interface TrailerType {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;  // in cents
+  referencePhotos: ReferencePhoto[];
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+}
+```
+
+**Integration with Homologation Form:**
+- TrailerInfoForm fetches trailer types from API
+- Dropdown is populated with active trailer types
+- PhotoUpload displays reference photos from the selected trailer type
+- PaymentStep calculates price from the trailer type's configured price
+
 ## Future Enhancements
 
 Planned features for the admin panel:
@@ -582,12 +643,13 @@ Planned features for the admin panel:
 4. ✅ **Delete Functionality** - Soft delete homologations (Implemented)
 5. ✅ **Quick Actions in List** - Status change directly from listing page (Implemented)
 6. ✅ **Admin Documents** - Upload payment receipts and homologation papers (Implemented)
-7. **Filtering & Sorting** - Filter by status, date, search in list view
-8. **User Management** - Create/manage admin users
-9. **Audit Log View** - View system audit trail
-10. **Statistics Dashboard** - Charts and metrics
-11. **Bulk Actions** - Select multiple homologations for batch operations
-12. **Export Functionality** - Export homologations to CSV/PDF
+7. ✅ **Trailer Types Management** - Manage trailer types with prices and reference photos (Implemented)
+8. **Filtering & Sorting** - Filter by status, date, search in list view
+9. **User Management** - Create/manage admin users
+10. **Audit Log View** - View system audit trail
+11. **Statistics Dashboard** - Charts and metrics
+12. **Bulk Actions** - Select multiple homologations for batch operations
+13. **Export Functionality** - Export homologations to CSV/PDF
 
 ## Development
 
